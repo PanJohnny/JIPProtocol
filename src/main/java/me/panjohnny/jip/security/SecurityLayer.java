@@ -44,10 +44,4 @@ public sealed class SecurityLayer permits ClientSecurityLayer, ServerSecurityLay
     public byte[] decrypt(byte[] encryptedData) throws Exception {
         return AESUtil.decryptAES(encryptedData, aesKey);
     }
-
-    protected byte[] createConfirmSEQ() {
-        byte[] confirmSEQ = new byte[2];
-        new SecureRandom().nextBytes(confirmSEQ);
-        return confirmSEQ;
-    }
 }
