@@ -1,4 +1,4 @@
-package me.panjohnny.jip.protocol.packets;
+package me.panjohnny.jip.transport;
 
 public class Packet {
     public byte[] length;
