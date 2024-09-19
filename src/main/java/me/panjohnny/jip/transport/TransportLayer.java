@@ -7,22 +7,20 @@ import java.io.OutputStream;
 public class TransportLayer {
     private InputStream input;
     private OutputStream output;
+    private TransportMiddleware middleware;
     public TransportLayer(InputStream input, OutputStream output) {
         this.input = input;
         this.output = output;
     }
 
-    public void waitForData() throws IOException {
-        while (input.available() == 0) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+    public void useMiddleware(TransportMiddleware middleware) {
+        this.middleware = middleware;
     }
 
     public void writePacket(Packet packet) throws IOException {
+        if (middleware != null) {
+            packet = middleware.proccessWrite(packet);
+        }
         output.write(packet.serialize());
     }
 
@@ -30,7 +28,11 @@ public class TransportLayer {
         byte[] header = readN(4);
         int len = (header[0] << 24) | (header[1] << 16) | (header[2] << 8) | header[3];
         byte[] data = readN(len);
-        return new Packet(len, data);
+        Packet packet = new Packet(len, data);
+        if (middleware != null) {
+            packet = middleware.proccessWrite(packet);
+        }
+        return packet;
     }
 
     public byte[] readAll() throws IOException {

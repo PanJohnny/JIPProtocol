@@ -57,6 +57,8 @@ public final class ClientImpl extends Client {
             transportLayer.writePacket(handshake);
             var serverHandshake = transportLayer.readN(256);
             securityLayer.acceptServerHandshake(serverHandshake);
+            transportLayer.useMiddleware(securityLayer);
+            logger.log(System.Logger.Level.INFO, "Secure connection with server established");
         } catch (IOException | SecureTransportException e) {
             logger.log(System.Logger.Level.ERROR, "Failed to handshake with the server, closing...", e);
             try {
@@ -70,7 +72,13 @@ public final class ClientImpl extends Client {
 
     @Override
     public Response fetch(Request request) {
-        return null;
+        try {
+            transportLayer.writePacket(request);
+            return Response.parse(transportLayer.readPacket());
+        } catch (IOException e) {
+            logger.log(System.Logger.Level.ERROR, "Failed to send the request to the server", e);
+            return null;
+        }
     }
 
     @Override

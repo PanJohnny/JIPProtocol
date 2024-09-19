@@ -64,7 +64,7 @@ public class Request extends Packet {
     @Override
     public byte[] serialize() {
         useData(toByteArray());
-        return data;
+        return super.serialize();
     }
 
     public byte[] toByteArray() {
@@ -79,5 +79,29 @@ public class Request extends Packet {
         System.arraycopy(headerBytes, 0, data, 0, headerBytes.length);
         System.arraycopy(body, 0, data, headerBytes.length, body.length);
         return data;
+    }
+
+    @Override
+    public String toString() {
+        return toByteArray().toString();
+    }
+
+    public static Request parse(Packet packet) {
+        String data = new String(packet.getData());
+        String[] lines = data.split("\n");
+        String[] versionResource = lines[0].split(" ");
+        String version = versionResource[0];
+        String resource = versionResource[1];
+        HashMap<String, String> headers = new HashMap<>();
+        byte[] body = new byte[0];
+        for (int i = 1; i < lines.length; i++) {
+            if (lines[i].equals("\r")) {
+                body = data.substring(i + 1).getBytes();
+                break;
+            }
+            String[] header = lines[i].split(": ");
+            headers.put(header[0], header[1]);
+        }
+        return new Request(version, resource, headers, body);
     }
 }

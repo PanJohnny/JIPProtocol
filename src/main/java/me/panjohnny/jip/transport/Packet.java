@@ -67,7 +67,13 @@ public class Packet {
         return data;
     }
 
-    public void encryptData(SecurityLayer securityLayer) throws SecureTransportException {
-        data = securityLayer.encrypt(data);
+    public Packet encryptData(SecurityLayer securityLayer) throws SecureTransportException {
+        useData(securityLayer.encrypt(data));
+        return this;
+    }
+
+    public Packet decryptData(SecurityLayer securityLayer) throws SecureTransportException {
+        useData(securityLayer.decrypt(data));
+        return this;
     }
 }

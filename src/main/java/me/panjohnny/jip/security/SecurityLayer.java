@@ -1,5 +1,7 @@
 package me.panjohnny.jip.security;
 
+import me.panjohnny.jip.transport.Packet;
+import me.panjohnny.jip.transport.TransportMiddleware;
 import me.panjohnny.jip.util.AESUtil;
 
 import javax.crypto.*;
@@ -7,9 +9,10 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 
-public sealed class SecurityLayer permits ClientSecurityLayer, ServerSecurityLayer {
+public sealed class SecurityLayer implements TransportMiddleware permits ClientSecurityLayer, ServerSecurityLayer {
 
     private SecretKey aesKey;
+    private final static System.Logger logger = System.getLogger(SecurityLayer.class.getName());
 
     protected byte[] encryptRSA(byte[] data, byte[] key) throws SecureTransportException {
         try {
@@ -64,5 +67,25 @@ public sealed class SecurityLayer permits ClientSecurityLayer, ServerSecurityLay
             throw new SecureTransportException("Failed to decrypt data with AES: " + e.getMessage());
         }
 
+    }
+
+    @Override
+    public Packet proccessWrite(Packet packet) {
+        try {
+            return packet.encryptData(this);
+        } catch (SecureTransportException e) {
+            logger.log(System.Logger.Level.ERROR, "Failed to encrypt packet: " + e.getMessage());
+            return packet;
+        }    
+    }
+
+    @Override
+    public Packet proccessRead(Packet packet) {
+        try {
+            return packet.decryptData(this);
+        } catch (SecureTransportException e) {
+            logger.log(System.Logger.Level.ERROR, "Failed to decrypt packet: " + e.getMessage());
+            return packet;
+        }
     }
 }
