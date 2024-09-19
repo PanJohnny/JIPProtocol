@@ -17,6 +17,7 @@ public class HandshakePacket extends Packet {
 
     @Override
     public byte[] serialize() {
+        System.out.println("Handshake len: " + data.length);
         return data;
     }
 }

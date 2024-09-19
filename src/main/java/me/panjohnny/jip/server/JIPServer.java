@@ -19,7 +19,7 @@ public abstract sealed class JIPServer permits JIPServerImpl {
     }
 
     public abstract void start() throws IOException;
-    public abstract void stop() throws InterruptedException;
+    public abstract void stop() throws InterruptedException, IOException;
 
     public abstract boolean isRunning();
 

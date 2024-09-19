@@ -3,20 +3,21 @@ package me.panjohnny.jip.client;
 
 import me.panjohnny.jip.commons.Request;
 import me.panjohnny.jip.commons.Response;
+import me.panjohnny.jip.security.SecureTransportException;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
 public abstract sealed class Client permits ClientImpl {
     protected InetSocketAddress address;
+
     public Client(InetSocketAddress address) {
         this.address = address;
     }
 
+    public abstract void connect() throws IOException, SecureTransportException;
 
-    public abstract void connect() throws IOException;
-
-    public abstract void connect(InetSocketAddress address) throws IOException;
+    public abstract void connect(InetSocketAddress address) throws IOException, SecureTransportException;
 
     public abstract boolean isConnected();
 

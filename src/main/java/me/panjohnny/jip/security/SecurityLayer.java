@@ -5,30 +5,42 @@ import me.panjohnny.jip.util.AESUtil;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
 public sealed class SecurityLayer permits ClientSecurityLayer, ServerSecurityLayer {
 
     private SecretKey aesKey;
 
-    protected byte[] encryptRSA(byte[] data, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(key);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PublicKey publicKey = keyFactory.generatePublic(spec);
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-        return cipher.doFinal(data);
+    protected byte[] encryptRSA(byte[] data, byte[] key) throws SecureTransportException {
+        try {
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(key);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PublicKey publicKey = keyFactory.generatePublic(spec);
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            return cipher.doFinal(data);
+        } catch (Exception e) {
+            throw new SecureTransportException("Failed to encrypt data with RSA: " + e.getMessage());
+        }
     }
 
-    protected PublicKey createPublicKey(byte[] publicKeyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeySpecException {
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        return keyFactory.generatePublic(spec);
+    protected PublicKey createPublicKey(byte[] publicKeyBytes)
+            throws SecureTransportException {
+        try {
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            return keyFactory.generatePublic(spec);
+        } catch (Exception e) {
+            throw new SecureTransportException("Failed to create public key: " + e.getMessage());
+        }
     }
 
-    protected SecretKey generateAESKey() throws NoSuchAlgorithmException {
-        this.aesKey = AESUtil.generateAESKey();
+    protected SecretKey generateAESKey() throws SecureTransportException {
+        try {
+            this.aesKey = AESUtil.generateAESKey();
+        } catch (NoSuchAlgorithmException e) {
+            throw new SecureTransportException("Failed to generate AES key: " + e.getMessage());
+        }
         return this.aesKey;
     }
 
@@ -37,11 +49,20 @@ public sealed class SecurityLayer permits ClientSecurityLayer, ServerSecurityLay
         this.aesKey = new SecretKeySpec(key, 0, key.length, "AES");
     }
 
-    public byte[] encrypt(byte[] data) throws Exception {
-        return AESUtil.encryptAES(data, aesKey);
+    public byte[] encrypt(byte[] data) throws SecureTransportException {
+        try {
+            return AESUtil.encryptAES(data, aesKey);
+        } catch (Exception e) {
+            throw new SecureTransportException("Failed to encrypt data with AES: " + e.getMessage());
+        }
     }
 
-    public byte[] decrypt(byte[] encryptedData) throws Exception {
-        return AESUtil.decryptAES(encryptedData, aesKey);
+    public byte[] decrypt(byte[] encryptedData) throws SecureTransportException {
+        try {
+            return AESUtil.decryptAES(encryptedData, aesKey);
+        } catch (Exception e) {
+            throw new SecureTransportException("Failed to decrypt data with AES: " + e.getMessage());
+        }
+
     }
 }

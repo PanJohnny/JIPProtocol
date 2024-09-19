@@ -1,5 +1,8 @@
 package me.panjohnny.jip.transport;
 
+import me.panjohnny.jip.security.SecureTransportException;
+import me.panjohnny.jip.security.SecurityLayer;
+
 public class Packet {
     public byte[] length;
     public byte[] data;
@@ -62,5 +65,9 @@ public class Packet {
 
     public byte[] getData() {
         return data;
+    }
+
+    public void encryptData(SecurityLayer securityLayer) throws SecureTransportException {
+        data = securityLayer.encrypt(data);
     }
 }
