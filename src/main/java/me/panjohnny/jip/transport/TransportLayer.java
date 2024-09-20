@@ -18,6 +18,7 @@ public class TransportLayer {
     }
 
     public void writePacket(Packet packet) throws IOException {
+        packet.prepare();
         if (middleware != null) {
             packet = middleware.proccessWrite(packet);
         }
@@ -30,7 +31,7 @@ public class TransportLayer {
         byte[] data = readN(len);
         Packet packet = new Packet(len, data);
         if (middleware != null) {
-            packet = middleware.proccessWrite(packet);
+            packet = middleware.proccessRead(packet);
         }
         return packet;
     }
@@ -41,5 +42,9 @@ public class TransportLayer {
 
     public byte[] readN(int len) throws IOException {
         return input.readNBytes(len);
+    }
+
+    public void flush() throws IOException {
+        output.flush();
     }
 }

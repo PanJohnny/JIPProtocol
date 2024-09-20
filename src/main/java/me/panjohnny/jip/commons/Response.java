@@ -9,6 +9,8 @@ public class Response extends Packet {
     private final HashMap<String, String> headers;
     private final byte[] body;
 
+    public static final Response OK = new Response("JIP/1.0", "OK");
+
     public Response(String version, HashMap<String, String> headers, byte[] body) {
         this.version = version;
         this.headers = headers;
@@ -34,21 +36,9 @@ public class Response extends Packet {
         return body;
     }
 
-    /**
-     * Scheme:
-     * 4 bytes - length of packet
-     * data
-     * 
-     * Data scheme:
-     * JIP/1.0
-     * header1: value1
-     * header2: value2
-     * \r\n
-     * body
-     */
-    public byte[] serialize() {
+    @Override
+    public void prepare() {
         useData(toString().getBytes());
-        return super.serialize();
     }
 
     @Override

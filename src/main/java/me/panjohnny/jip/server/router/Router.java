@@ -32,11 +32,14 @@ public class Router {
     }
 
     public boolean hasRoute(String path) {
+        System.out.println("Searching for route: " + path);
         for (Route route : routes.keySet()) {
             if (route.matches(path)) {
                 return true;
             }
+            System.out.println("Loop");
         }
+        System.out.println("Route not found: " + path);
         return false;
     }
 

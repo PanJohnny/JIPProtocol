@@ -4,6 +4,7 @@ import me.panjohnny.jip.commons.Request;
 import me.panjohnny.jip.commons.Response;
 import me.panjohnny.jip.security.ClientSecurityLayer;
 import me.panjohnny.jip.security.SecureTransportException;
+import me.panjohnny.jip.transport.Packet;
 import me.panjohnny.jip.transport.TransportLayer;
 
 import java.io.IOException;
@@ -73,6 +74,14 @@ public final class ClientImpl extends Client {
     @Override
     public Response fetch(Request request) {
         try {
+            // Server ready
+            Packet serverReady = transportLayer.readPacket();
+            if (serverReady.getLength() != 1 || serverReady.getData()[0] != 1) {
+                logger.log(System.Logger.Level.ERROR, "Server is not ready to receive the request - Invalid server ready packet: {0}", serverReady);
+                return null;
+            }
+            // Server ready
+            logger.log(System.Logger.Level.INFO, "Server is ready to receive the request");
             transportLayer.writePacket(request);
             return Response.parse(transportLayer.readPacket());
         } catch (IOException e) {

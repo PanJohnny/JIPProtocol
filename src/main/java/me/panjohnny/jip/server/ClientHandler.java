@@ -6,6 +6,7 @@ import java.net.Socket;
 import me.panjohnny.jip.commons.Request;
 import me.panjohnny.jip.commons.Response;
 import me.panjohnny.jip.security.ServerSecurityLayer;
+import me.panjohnny.jip.server.router.Router;
 import me.panjohnny.jip.transport.Packet;
 import me.panjohnny.jip.transport.TransportLayer;
 
@@ -13,10 +14,12 @@ public class ClientHandler {
     private Socket socket;
     private ServerSecurityLayer securityLayer;
     private TransportLayer transportLayer;
-    public ClientHandler(Socket socket) throws IOException {
+    private Router router;
+    public ClientHandler(Socket socket, Router router) throws IOException {
         this.socket = socket;
         this.transportLayer = new TransportLayer(socket.getInputStream(), socket.getOutputStream());
         this.securityLayer = new ServerSecurityLayer();
+        this.router = router;
         handshake();
         handleRequest();
     }
@@ -41,16 +44,22 @@ public class ClientHandler {
     }
 
     public void handleRequest() {
-        // TODO implement properly
         System.Logger logger = System.getLogger(ClientHandler.class.getName());
         try {
+            // Server ready
+            transportLayer.writePacket(new Packet(1, new byte[] {1}));
             Packet packet = transportLayer.readPacket();
-            System.out.println("Received packet: " + packet);
             Request request = Request.parse(packet);
-            // log the request
-            logger.log(System.Logger.Level.INFO, "Received request: " + request);
-            Response response = new Response("JIP/1.0", "OK");
-            transportLayer.writePacket(response);
+            System.out.println("Request received: " + request);
+            if (router.hasRoute(request.getResource())) {
+                Response response = Response.OK;
+                router.getHandler(request.getResource()).handle(request, response);
+                transportLayer.writePacket(response);
+            } else {
+                Response response = new Response("JIP/1.0", "Not Found");
+                transportLayer.writePacket(response);
+            }
+            //transportLayer.flush();
         } catch (IOException e) {
             
             logger.log(System.Logger.Level.ERROR, "Failed to read packet from the client, closing...", e);

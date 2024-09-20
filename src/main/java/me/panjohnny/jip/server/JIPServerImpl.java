@@ -13,6 +13,7 @@ public final class JIPServerImpl extends JIPServer {
     private ServerSocket serverSocket;
     private boolean running;
     private Thread acceptThread;
+    private Router router;
     public JIPServerImpl(InetSocketAddress address) {
         super(address);
     }
@@ -49,7 +50,7 @@ public final class JIPServerImpl extends JIPServer {
             var socket = serverSocket.accept();
             threadPool.submit(() -> {
                 try {
-                    new ClientHandler(socket);
+                    new ClientHandler(socket, router);
                 } catch (IOException e) {
                     System.Logger logger = System.getLogger(JIPServerImpl.class.getName());
                     logger.log(System.Logger.Level.ERROR, "Failed to create a client handler", e);
@@ -68,6 +69,6 @@ public final class JIPServerImpl extends JIPServer {
 
     @Override
     public Router getRouter() {
-        return null;
+        return router;
     }
 }

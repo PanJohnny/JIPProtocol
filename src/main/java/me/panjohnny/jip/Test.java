@@ -11,6 +11,8 @@ import java.util.Arrays;
 
 public class Test {
     public static void main(String[] args) throws Exception {
+        //handshakeTest();
+        
         var server = JIPServer.create(new InetSocketAddress(8080));
         server.start();
         var client = Client.create(new InetSocketAddress(8080));
@@ -20,10 +22,11 @@ public class Test {
         Thread.sleep(100);
 
         // Send some data to the server
-        var response = client.fetch(new Request("JIP/1.0", "Hello, Server!"));
-        System.out.println(response);
+        var response = client.fetch(new Request("JIP/1.0", "/"));
+        System.getLogger(Test.class.getName()).log(System.Logger.Level.INFO, "Response from server: " + response);
 
         System.exit(0);
+        
     }
 
     public static void handshakeTest() throws Exception {
@@ -45,7 +48,6 @@ public class Test {
         var helloServer = "Hello, Server!".getBytes();
         var encrypted = clientSecurityLayer.encrypt(helloServer);
         var decrypted = serverSecurityLayer.decrypt(encrypted);
-        System.out.println(new String(decrypted));
         assert Arrays.equals(encrypted, decrypted);
 
         /**
@@ -54,7 +56,6 @@ public class Test {
         var helloClient = "Hello, Client!".getBytes();
         encrypted = serverSecurityLayer.encrypt(helloClient);
         decrypted = clientSecurityLayer.decrypt(encrypted);
-        System.out.println(new String(decrypted));
         assert Arrays.equals(encrypted, decrypted);
     }
 }

@@ -51,6 +51,10 @@ public class Packet {
         setLength(data.length);
     }
 
+    public void prepare() {
+        // Do nothing by default
+    }
+
     public byte[] serialize() {
         // length[4] + data[length]
         byte[] packet = new byte[4 + data.length];

@@ -8,6 +8,7 @@ import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 public sealed class SecurityLayer implements TransportMiddleware permits ClientSecurityLayer, ServerSecurityLayer {
 
@@ -54,27 +55,32 @@ public sealed class SecurityLayer implements TransportMiddleware permits ClientS
 
     public byte[] encrypt(byte[] data) throws SecureTransportException {
         try {
-            return AESUtil.encryptAES(data, aesKey);
+            // Add Base64 encoding to the encrypted data
+            var encryptedData = AESUtil.encryptAES(data, aesKey);
+            return Base64.getEncoder().encode(encryptedData);
+            //return encryptedData;
         } catch (Exception e) {
-            throw new SecureTransportException("Failed to encrypt data with AES: " + e.getMessage());
+            throw new SecureTransportException("Failed to encrypt data with AES: " + e.getMessage(), e);
         }
     }
-
+    
     public byte[] decrypt(byte[] encryptedData) throws SecureTransportException {
         try {
+            // Decode Base64 before decrypting
+            encryptedData = Base64.getDecoder().decode(encryptedData);
             return AESUtil.decryptAES(encryptedData, aesKey);
         } catch (Exception e) {
-            throw new SecureTransportException("Failed to decrypt data with AES: " + e.getMessage());
+            throw new SecureTransportException("Failed to decrypt data with AES: " + e.getMessage(), e);
         }
-
     }
+    
 
     @Override
     public Packet proccessWrite(Packet packet) {
         try {
             return packet.encryptData(this);
         } catch (SecureTransportException e) {
-            logger.log(System.Logger.Level.ERROR, "Failed to encrypt packet: " + e.getMessage());
+            logger.log(System.Logger.Level.ERROR, "Failed to encrypt packet: " + e.getMessage(), e);
             return packet;
         }    
     }
@@ -84,7 +90,7 @@ public sealed class SecurityLayer implements TransportMiddleware permits ClientS
         try {
             return packet.decryptData(this);
         } catch (SecureTransportException e) {
-            logger.log(System.Logger.Level.ERROR, "Failed to decrypt packet: " + e.getMessage());
+            logger.log(System.Logger.Level.ERROR, "Failed to decrypt packet: " + e.getMessage(), e);
             return packet;
         }
     }

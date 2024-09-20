@@ -50,21 +50,9 @@ public class Request extends Packet {
         return body;
     }
 
-    /**
-     * Scheme:
-     * 4 bytes - length of packet
-     * data
-     * 
-     * Data scheme:
-     * JIP/1.0 resource
-     * header1: value1
-     * \r\n
-     * body
-     */
     @Override
-    public byte[] serialize() {
+    public void prepare() {
         useData(toByteArray());
-        return super.serialize();
     }
 
     public byte[] toByteArray() {
