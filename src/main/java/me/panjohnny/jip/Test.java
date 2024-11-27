@@ -2,6 +2,7 @@ package me.panjohnny.jip;
 
 import me.panjohnny.jip.client.Client;
 import me.panjohnny.jip.commons.Request;
+import me.panjohnny.jip.commons.Response;
 import me.panjohnny.jip.server.JIPServer;
 
 import java.net.InetSocketAddress;
@@ -9,6 +10,10 @@ import java.net.InetSocketAddress;
 public class Test {
     public static void main(String[] args) throws Exception {
         var server = JIPServer.create(new InetSocketAddress(8080));
+        // Configure router before accepting requests
+        server.getRouter().route("/", ((request, response) -> {
+
+        }));
         server.start();
         var client = Client.create(new InetSocketAddress(8080));
         client.connect();

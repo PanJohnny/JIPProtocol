@@ -16,6 +16,7 @@ public final class JIPServerImpl extends JIPServer {
     private Router router;
     public JIPServerImpl(InetSocketAddress address) {
         super(address);
+        router = new Router();
     }
 
     public JIPServerImpl(InetSocketAddress address, int threadPoolSize) {
@@ -28,7 +29,6 @@ public final class JIPServerImpl extends JIPServer {
         threadPool = Executors.newFixedThreadPool(threadPoolSize);
         serverSocket = new ServerSocket();
         serverSocket.bind(address);
-        router = new Router();
         acceptThread = new Thread(() -> {
             while (running) {
                 accept();
