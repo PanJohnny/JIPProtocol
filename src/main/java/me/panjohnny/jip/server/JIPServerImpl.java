@@ -28,6 +28,7 @@ public final class JIPServerImpl extends JIPServer {
         threadPool = Executors.newFixedThreadPool(threadPoolSize);
         serverSocket = new ServerSocket();
         serverSocket.bind(address);
+        router = new Router();
         acceptThread = new Thread(() -> {
             while (running) {
                 accept();

@@ -56,15 +56,20 @@ public class Response extends Packet {
         var lines = data.split("\n");
         var version = lines[0];
         var headers = new HashMap<String, String>();
-        var body = new byte[0];
+        StringBuilder body = new StringBuilder();
+        boolean isBody = false;
         for (int i = 1; i < lines.length; i++) {
-            if (lines[i].equals("\r")) {
-                body = data.substring(i + 1).getBytes();
-                break;
+            String line = lines[i];
+            if (line.equals("\r")) {
+                // The rest of the lines after this one is the request body
+                isBody = true;
+            } else if(isBody) {
+                body.append(line).append("\n");
+            } else {
+                var header = line.split(": ");
+                headers.put(header[0], header[1]);
             }
-            var header = lines[i].split(": ");
-            headers.put(header[0], header[1]);
         }
-        return new Response(version, headers, body);
+        return new Response(version, headers, body.toString().getBytes());
     }
 }

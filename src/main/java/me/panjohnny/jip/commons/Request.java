@@ -69,11 +69,6 @@ public class Request extends Packet {
         return data;
     }
 
-    @Override
-    public String toString() {
-        return toByteArray().toString();
-    }
-
     public static Request parse(Packet packet) {
         String data = new String(packet.getData());
         String[] lines = data.split("\n");

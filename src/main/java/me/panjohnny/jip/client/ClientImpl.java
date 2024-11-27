@@ -59,7 +59,6 @@ public final class ClientImpl extends Client {
             var serverHandshake = transportLayer.readN(256);
             securityLayer.acceptServerHandshake(serverHandshake);
             transportLayer.useMiddleware(securityLayer);
-            logger.log(System.Logger.Level.INFO, "Secure connection with server established");
         } catch (IOException | SecureTransportException e) {
             logger.log(System.Logger.Level.ERROR, "Failed to handshake with the server, closing...", e);
             try {
@@ -74,14 +73,12 @@ public final class ClientImpl extends Client {
     @Override
     public Response fetch(Request request) {
         try {
-            // Server ready
             Packet serverReady = transportLayer.readPacket();
             if (serverReady.getLength() != 1 || serverReady.getData()[0] != 1) {
                 logger.log(System.Logger.Level.ERROR, "Server is not ready to receive the request - Invalid server ready packet: {0}", serverReady);
                 return null;
             }
-            // Server ready
-            logger.log(System.Logger.Level.INFO, "Server is ready to receive the request");
+            // Server is ready now
             transportLayer.writePacket(request);
             return Response.parse(transportLayer.readPacket());
         } catch (IOException e) {

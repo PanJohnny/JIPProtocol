@@ -76,7 +76,7 @@ public sealed class SecurityLayer implements TransportMiddleware permits ClientS
     
 
     @Override
-    public Packet proccessWrite(Packet packet) {
+    public Packet processWrite(Packet packet) {
         try {
             return packet.encryptData(this);
         } catch (SecureTransportException e) {
@@ -86,7 +86,7 @@ public sealed class SecurityLayer implements TransportMiddleware permits ClientS
     }
 
     @Override
-    public Packet proccessRead(Packet packet) {
+    public Packet processRead(Packet packet) {
         try {
             return packet.decryptData(this);
         } catch (SecureTransportException e) {
