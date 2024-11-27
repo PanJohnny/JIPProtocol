@@ -21,7 +21,7 @@ public abstract sealed class Client permits ClientImpl {
 
     public abstract boolean isConnected();
 
-    public abstract Response fetch(Request request);
+    public abstract Response fetch(Request request) throws SecureTransportException, IOException;
 
     public abstract void close() throws IOException;
 
@@ -33,4 +33,6 @@ public abstract sealed class Client permits ClientImpl {
     public static Client create(InetSocketAddress address) {
         return new ClientImpl(address);
     }
+
+    public abstract void disconnect() throws IOException;
 }

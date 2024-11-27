@@ -71,20 +71,19 @@ public final class ClientImpl extends Client {
     }
 
     @Override
-    public Response fetch(Request request) {
-        try {
-            Packet serverReady = transportLayer.readPacket();
-            if (serverReady.getLength() != 1 || serverReady.getData()[0] != 1) {
-                logger.log(System.Logger.Level.ERROR, "Server is not ready to receive the request - Invalid server ready packet: {0}", serverReady);
-                return null;
-            }
-            // Server is ready now
-            transportLayer.writePacket(request);
-            return Response.parse(transportLayer.readPacket());
-        } catch (IOException e) {
-            logger.log(System.Logger.Level.ERROR, "Failed to send the request to the server", e);
+    public Response fetch(Request request) throws SecureTransportException, IOException {
+        connect();
+        Packet serverReady = transportLayer.readPacket();
+        if (serverReady.getLength() != 1 || serverReady.getData()[0] != 1) {
+            logger.log(System.Logger.Level.ERROR, "Server is not ready to receive the request - Invalid server ready packet: {0}", serverReady);
             return null;
         }
+        // Server is ready now
+        transportLayer.writePacket(request);
+
+        var res = Response.parse(transportLayer.readPacket());
+        disconnect();
+        return res;
     }
 
     @Override
@@ -94,6 +93,12 @@ public final class ClientImpl extends Client {
 
     @Override
     public boolean isClosed() {
-        return socket.isClosed();
+        return socket != null && socket.isClosed();
+    }
+
+    @Override
+    public void disconnect() throws IOException {
+        close();
+        socket = null;
     }
 }
