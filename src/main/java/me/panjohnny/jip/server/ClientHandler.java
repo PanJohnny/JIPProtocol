@@ -2,6 +2,7 @@ package me.panjohnny.jip.server;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 import me.panjohnny.jip.commons.Request;
 import me.panjohnny.jip.commons.Response;
@@ -15,17 +16,23 @@ public class ClientHandler {
     private final ServerSecurityLayer securityLayer;
     private final TransportLayer transportLayer;
     private final Router router;
+    private final static System.Logger LOGGER = System.getLogger(ClientHandler.class.getName());
+
+    public static final long TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(10);
+
     public ClientHandler(Socket socket, Router router) throws IOException {
         this.socket = socket;
         this.transportLayer = new TransportLayer(socket.getInputStream(), socket.getOutputStream());
         this.securityLayer = new ServerSecurityLayer();
         this.router = router;
+    }
+
+    public void handle() {
         handshake();
-        handleRequest();
+        handleRequests();
     }
 
     private void handshake() {
-        System.Logger logger = System.getLogger(ClientHandler.class.getName());
         try {
             var clientHandshake = transportLayer.readN(294);
             securityLayer.acceptClientHandshake(clientHandshake);
@@ -33,21 +40,49 @@ public class ClientHandler {
             transportLayer.writePacket(handshakePacket);
             transportLayer.useMiddleware(securityLayer);
         } catch (Exception e) {
-            logger.log(System.Logger.Level.ERROR, "Failed to handshake with the client, closing...", e);
+            LOGGER.log(System.Logger.Level.ERROR, "Failed to handshake with the client, closing...", e);
             try {
                 socket.close();
             } catch (IOException ex) {
-                logger.log(System.Logger.Level.ERROR, "Failed to close the socket", ex);
+                LOGGER.log(System.Logger.Level.ERROR, "Failed to close the socket", ex);
             }
         }
     }
 
-    public void handleRequest() {
-        System.Logger logger = System.getLogger(ClientHandler.class.getName());
+    private boolean ready;
+    private void handleRequests() {
+        long lastTime = System.nanoTime();
+        ready = false;
+        // Server ready
         try {
-            // Server ready
             transportLayer.writePacket(new Packet(1, new byte[] {1}));
+            ready = true;
+        } catch (IOException e) {
+            LOGGER.log(System.Logger.Level.ERROR, "Failed to notify ready state, closing...", e);
+        }
+
+        while (ready && !socket.isClosed() && System.currentTimeMillis() - lastTime < TIMEOUT_NANOS) {
+            handleRequest();
+            lastTime = System.nanoTime();
+        }
+
+        if (!socket.isClosed()) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                LOGGER.log(System.Logger.Level.ERROR, "Failed to close socket", e);
+            }
+        }
+    }
+
+    private void handleRequest() {
+        try {
             Packet packet = transportLayer.readPacket();
+            // Connection was closed by the client
+            if (packet == null) {
+                ready = false;
+                return;
+            }
             Request request = Request.parse(packet);
 
             if (router.hasRoute(request.getResource())) {
@@ -60,11 +95,11 @@ public class ClientHandler {
             }
             //transportLayer.flush();
         } catch (Exception e) {
-            logger.log(System.Logger.Level.ERROR, "Failed to read packet from the client, closing...", e);
+            LOGGER.log(System.Logger.Level.ERROR, "Failed to read packet from the client, closing...", e);
             try {
                 socket.close();
             } catch (IOException ex) {
-                logger.log(System.Logger.Level.ERROR, "Failed to close the socket", ex);
+                LOGGER.log(System.Logger.Level.ERROR, "Failed to close the socket", ex);
             }
         }   
     }

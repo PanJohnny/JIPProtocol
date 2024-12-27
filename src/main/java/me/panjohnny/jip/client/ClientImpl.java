@@ -33,6 +33,12 @@ public final class ClientImpl extends Client {
         securityLayer = new ClientSecurityLayer();
 
         handshake();
+
+        Packet serverReady = transportLayer.readPacket();
+        if (serverReady.getLength() != 1 || serverReady.getData()[0] != 1) {
+            logger.log(System.Logger.Level.ERROR, "Server is not ready to receive the request - Invalid server ready packet: {0}", serverReady);
+            close();
+        }
     }
 
     @Override
@@ -72,17 +78,12 @@ public final class ClientImpl extends Client {
 
     @Override
     public Response fetch(Request request) throws SecureTransportException, IOException {
-        connect();
-        Packet serverReady = transportLayer.readPacket();
-        if (serverReady.getLength() != 1 || serverReady.getData()[0] != 1) {
-            logger.log(System.Logger.Level.ERROR, "Server is not ready to receive the request - Invalid server ready packet: {0}", serverReady);
-            return null;
-        }
+        //connect()
         // Server is ready now
         transportLayer.writePacket(request);
 
         var res = Response.parse(transportLayer.readPacket());
-        disconnect();
+        //disconnect();
         return res;
     }
 

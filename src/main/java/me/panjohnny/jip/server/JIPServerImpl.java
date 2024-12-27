@@ -30,8 +30,16 @@ public final class JIPServerImpl extends JIPServer {
         serverSocket = new ServerSocket();
         serverSocket.bind(address);
         acceptThread = new Thread(() -> {
-            while (running) {
-                accept();
+            try {
+                while (running) {
+                    accept();
+                }
+            } catch (Exception e) {
+                if (!running) {
+                    return;
+                }
+                System.Logger logger = System.getLogger(JIPServerImpl.class.getName());
+                logger.log(System.Logger.Level.ERROR, "Failed to accept a client", e);
             }
         });
         running = true;
@@ -41,9 +49,9 @@ public final class JIPServerImpl extends JIPServer {
     @Override
     public void stop() throws InterruptedException, IOException {
         running = false;
+        serverSocket.close();
         acceptThread.join();
         threadPool.shutdownNow();
-        serverSocket.close();
     }
 
     private void accept() {
@@ -51,13 +59,19 @@ public final class JIPServerImpl extends JIPServer {
             var socket = serverSocket.accept();
             threadPool.submit(() -> {
                 try {
-                    new ClientHandler(socket, router);
+                    new ClientHandler(socket, router).handle();
                 } catch (IOException e) {
+                    if (!running) {
+                        return;
+                    }
                     System.Logger logger = System.getLogger(JIPServerImpl.class.getName());
                     logger.log(System.Logger.Level.ERROR, "Failed to create a client handler", e);
                 }
             });
         } catch (IOException e) {
+            if (!running) {
+                return;
+            }
             System.Logger logger = System.getLogger(JIPServerImpl.class.getName());
             logger.log(System.Logger.Level.ERROR, "Failed to accept a client", e);
         }

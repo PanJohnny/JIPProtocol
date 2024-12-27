@@ -27,6 +27,9 @@ public class TransportLayer {
 
     public Packet readPacket() throws IOException {
         byte[] header = readN(4);
+        if (header.length != 4) {
+            return null;
+        }
         int len = (header[0] << 24) | (header[1] << 16) | (header[2] << 8) | header[3];
         byte[] data = readN(len);
         Packet packet = new Packet(len, data);

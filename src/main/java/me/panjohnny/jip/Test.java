@@ -15,13 +15,19 @@ public class Test {
         }));
         server.start();
         var client = Client.create(new InetSocketAddress(8080));
+        client.connect();
         // Send some data to the server
         var notFound = client.fetch(new Request("JIP/1.0", "/"));
-        System.getLogger(Test.class.getName()).log(System.Logger.Level.INFO, "404:\n{0}\n\n", notFound);
+        System.Logger logger = System.getLogger(Test.class.getName());
+        logger.log(System.Logger.Level.INFO, "404:\n{0}\n\n", notFound);
 
         var test = client.fetch(new Request("JIP/1.0", "/test"));
-        System.getLogger(Test.class.getName()).log(System.Logger.Level.INFO, "test:\n{0}\n\n", test);
+        logger.log(System.Logger.Level.INFO, "test:\n{0}\n\n", test);
 
-        System.exit(0);
+        client.disconnect();
+        server.stop();
+
+        // Resources disposed
+        logger.log(System.Logger.Level.INFO, "All resources disposed");
     }
 }
