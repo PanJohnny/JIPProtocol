@@ -4,6 +4,12 @@ import me.panjohnny.jip.server.RequestHandler;
 
 import java.util.HashMap;
 
+/**
+ * Routing handler.
+ *
+ * @see Route
+ * @author Jan Štefanča
+ */
 public class Router {
     private final HashMap<Route, RequestHandler> routes;
     public Router() {

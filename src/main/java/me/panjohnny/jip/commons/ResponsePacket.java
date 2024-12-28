@@ -4,20 +4,27 @@ import java.util.HashMap;
 
 import me.panjohnny.jip.transport.Packet;
 
-public class Response extends Packet {
+/**
+ * A packet representing response sent from the server.
+ *
+ * @author Jan Štefanča
+ * @see Packet
+ * @see me.panjohnny.jip.transport.TransportLayer
+ */
+public class ResponsePacket extends Packet {
     private final String version;
     private final HashMap<String, String> headers;
     private final byte[] body;
 
-    public static final Response OK = new Response("JIP/1.0", "OK");
+    public static final ResponsePacket OK = new ResponsePacket("JIP/1.0", "OK");
 
-    public Response(String version, HashMap<String, String> headers, byte[] body) {
+    public ResponsePacket(String version, HashMap<String, String> headers, byte[] body) {
         this.version = version;
         this.headers = headers;
         this.body = body;
     }
 
-    public Response(String version, String status) {
+    public ResponsePacket(String version, String status) {
         this.version = version;
         this.headers = new HashMap<>();
         this.headers.put("Status", status);
@@ -51,7 +58,7 @@ public class Response extends Packet {
         return data.toString();
     }
 
-    public static Response parse(Packet packet) {
+    public static ResponsePacket parse(Packet packet) {
         var data = new String(packet.getData());
         var lines = data.split("\n");
         var version = lines[0];
@@ -70,6 +77,6 @@ public class Response extends Packet {
                 headers.put(header[0], header[1]);
             }
         }
-        return new Response(version, headers, body.toString().getBytes());
+        return new ResponsePacket(version, headers, body.toString().getBytes());
     }
 }

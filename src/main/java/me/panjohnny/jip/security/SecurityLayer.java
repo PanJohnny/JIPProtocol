@@ -10,6 +10,14 @@ import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
+/**
+ * A layer for encrypting and decrypting packets. Works as a middleware.
+ *
+ * @see Packet
+ * @see me.panjohnny.jip.transport.TransportLayer
+ * @see TransportMiddleware
+ * @author Jan Štefanča
+ */
 public sealed class SecurityLayer implements TransportMiddleware permits ClientSecurityLayer, ServerSecurityLayer {
 
     private SecretKey aesKey;

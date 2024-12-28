@@ -4,13 +4,20 @@ import java.util.HashMap;
 
 import me.panjohnny.jip.transport.Packet;
 
-public class Request extends Packet {
+/**
+ * A packet representing request to the server.
+ *
+ * @author Jan Štefanča
+ * @see Packet
+ * @see me.panjohnny.jip.transport.TransportLayer
+ */
+public class RequestPacket extends Packet {
     private final String version;
     private final String resource;
     private final HashMap<String, String> headers;
     private final byte[] body;
 
-    public Request(String version, String resource, HashMap<String, String> headers, byte[] body) {
+    public RequestPacket(String version, String resource, HashMap<String, String> headers, byte[] body) {
         super();
         this.version = version;
         this.resource = resource;
@@ -18,7 +25,7 @@ public class Request extends Packet {
         this.body = body;
     }
 
-    public Request(String version, String resource, byte[] body) {
+    public RequestPacket(String version, String resource, byte[] body) {
         super();
         this.version = version;
         this.resource = resource;
@@ -26,7 +33,7 @@ public class Request extends Packet {
         this.body = body;
     }
 
-    public Request(String version, String resource) {
+    public RequestPacket(String version, String resource) {
         super();
         this.version = version;
         this.resource = resource;
@@ -69,7 +76,7 @@ public class Request extends Packet {
         return data;
     }
 
-    public static Request parse(Packet packet) {
+    public static RequestPacket parse(Packet packet) {
         String data = new String(packet.getData());
         String[] lines = data.split("\n");
         String[] versionResource = lines[0].split(" ");
@@ -85,6 +92,6 @@ public class Request extends Packet {
             String[] header = lines[i].split(": ");
             headers.put(header[0], header[1]);
         }
-        return new Request(version, resource, headers, body);
+        return new RequestPacket(version, resource, headers, body);
     }
 }

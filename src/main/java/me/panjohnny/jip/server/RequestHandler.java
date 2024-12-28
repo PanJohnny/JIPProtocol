@@ -1,8 +1,8 @@
 package me.panjohnny.jip.server;
 
-import me.panjohnny.jip.commons.Request;
-import me.panjohnny.jip.commons.Response;
+import me.panjohnny.jip.commons.RequestPacket;
+import me.panjohnny.jip.commons.ResponsePacket;
 
 public interface RequestHandler {
-    void handle(Request request, Response response);
+    void handle(RequestPacket requestPacket, ResponsePacket responsePacket);
 }

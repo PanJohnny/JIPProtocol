@@ -7,6 +7,7 @@ import me.panjohnny.jip.util.URLUtil;
  * <p>
  * For example, if the path is "/home", it will match only "/home".
  * @see DynamicRoute
+ * @author Jan Štefanča
  */
 public final class StaticRoute extends Route {
     public StaticRoute(String path) {

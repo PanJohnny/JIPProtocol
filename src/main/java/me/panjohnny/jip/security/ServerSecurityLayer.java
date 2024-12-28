@@ -1,5 +1,11 @@
 package me.panjohnny.jip.security;
 
+/**
+ * Server security layer used to accept client handshake and send back RSA key. Every client has its own.
+ *
+ * @see SecurityLayer
+ * @author Jan Štefanča
+ */
 public final class ServerSecurityLayer extends SecurityLayer {
     private byte[] rsaEncryptedAESKey;
 

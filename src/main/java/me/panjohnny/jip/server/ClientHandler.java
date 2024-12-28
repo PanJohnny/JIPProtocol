@@ -4,13 +4,18 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
-import me.panjohnny.jip.commons.Request;
-import me.panjohnny.jip.commons.Response;
+import me.panjohnny.jip.commons.RequestPacket;
+import me.panjohnny.jip.commons.ResponsePacket;
 import me.panjohnny.jip.security.ServerSecurityLayer;
 import me.panjohnny.jip.server.router.Router;
 import me.panjohnny.jip.transport.Packet;
 import me.panjohnny.jip.transport.TransportLayer;
 
+/**
+ * Handles client requests.
+ *
+ * @author Jan Štefanča
+ */
 public class ClientHandler {
     private final Socket socket;
     private final ServerSecurityLayer securityLayer;
@@ -83,15 +88,15 @@ public class ClientHandler {
                 ready = false;
                 return;
             }
-            Request request = Request.parse(packet);
+            RequestPacket requestPacket = RequestPacket.parse(packet);
 
-            if (router.hasRoute(request.getResource())) {
-                Response response = Response.OK;
-                router.getHandler(request.getResource()).handle(request, response);
-                transportLayer.writePacket(response);
+            if (router.hasRoute(requestPacket.getResource())) {
+                ResponsePacket responsePacket = ResponsePacket.OK;
+                router.getHandler(requestPacket.getResource()).handle(requestPacket, responsePacket);
+                transportLayer.writePacket(responsePacket);
             } else {
-                Response response = new Response("JIP/1.0", "Not Found");
-                transportLayer.writePacket(response);
+                ResponsePacket responsePacket = new ResponsePacket("JIP/1.0", "Not Found");
+                transportLayer.writePacket(responsePacket);
             }
             //transportLayer.flush();
         } catch (Exception e) {

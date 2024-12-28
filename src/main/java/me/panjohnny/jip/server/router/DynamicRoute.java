@@ -12,6 +12,7 @@ import java.util.HashMap;
  * - For example, if the path is "/home/[id]", it will match "/home/1", "/home/2", etc.
  * - You can nest dynamic routes, for example, "/home/[id]/[action]" will match "/home/1/edit", "/home/2/delete", etc.
  * @see StaticRoute
+ * @author Jan Štefanča
  */
 public final class DynamicRoute extends Route {
     public DynamicRoute(String path) {

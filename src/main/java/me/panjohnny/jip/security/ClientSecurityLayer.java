@@ -4,6 +4,12 @@ import javax.crypto.Cipher;
 
 import java.security.*;
 
+/**
+ * Security layer implementation on the client. Used to generate RSA keypair, that is used to receive AES key from the server during handshake.
+ *
+ * @see SecurityLayer
+ * @author Jan Štefanča
+ */
 public final class ClientSecurityLayer extends SecurityLayer {
     private PublicKey localPublicKey;
     private PrivateKey localPrivateKey;
