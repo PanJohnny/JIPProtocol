@@ -40,12 +40,6 @@ public class Packet {
         return (length[0] << 24) | (length[1] << 16) | (length[2] << 8) | length[3];
     }
 
-    public void parse(byte[] packet) {
-        length = new byte[] {packet[0], packet[1], packet[2], packet[3]};
-        data = new byte[packet.length - 4];
-        System.arraycopy(packet, 4, data, 0, data.length);
-    }
-
     public void useData(byte[] data) {
         this.data = data;
         setLength(data.length);

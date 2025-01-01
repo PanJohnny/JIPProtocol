@@ -6,9 +6,6 @@ import me.panjohnny.jip.transport.Packet;
  * Handshake packet
  *
  * <p>Packet used to establish a secure connection between the client and the server.</p>
- *
- * <p>The first two bytes is confirmSEQ - confirm sequence and the other bytes are the public key.</p>
- *
  * @author Jan Štefanča
  * @see Packet
  */

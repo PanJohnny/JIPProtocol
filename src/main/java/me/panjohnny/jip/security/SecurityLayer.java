@@ -19,9 +19,8 @@ import java.util.Base64;
  * @author Jan Štefanča
  */
 public sealed class SecurityLayer implements TransportMiddleware permits ClientSecurityLayer, ServerSecurityLayer {
-
     private SecretKey aesKey;
-    private final static System.Logger logger = System.getLogger(SecurityLayer.class.getName());
+    private final static System.Logger LOGGER = System.getLogger(SecurityLayer.class.getName());
 
     protected byte[] encryptRSA(byte[] data, byte[] key) throws SecureTransportException {
         try {
@@ -33,17 +32,6 @@ public sealed class SecurityLayer implements TransportMiddleware permits ClientS
             return cipher.doFinal(data);
         } catch (Exception e) {
             throw new SecureTransportException("Failed to encrypt data with RSA: " + e.getMessage());
-        }
-    }
-
-    protected PublicKey createPublicKey(byte[] publicKeyBytes)
-            throws SecureTransportException {
-        try {
-            X509EncodedKeySpec spec = new X509EncodedKeySpec(publicKeyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            return keyFactory.generatePublic(spec);
-        } catch (Exception e) {
-            throw new SecureTransportException("Failed to create public key: " + e.getMessage());
         }
     }
 
@@ -66,7 +54,6 @@ public sealed class SecurityLayer implements TransportMiddleware permits ClientS
             // Add Base64 encoding to the encrypted data
             var encryptedData = AESUtil.encryptAES(data, aesKey);
             return Base64.getEncoder().encode(encryptedData);
-            //return encryptedData;
         } catch (Exception e) {
             throw new SecureTransportException("Failed to encrypt data with AES: " + e.getMessage(), e);
         }
@@ -88,7 +75,7 @@ public sealed class SecurityLayer implements TransportMiddleware permits ClientS
         try {
             return packet.encryptData(this);
         } catch (SecureTransportException e) {
-            logger.log(System.Logger.Level.ERROR, "Failed to encrypt packet: " + e.getMessage(), e);
+            LOGGER.log(System.Logger.Level.ERROR, "Failed to encrypt packet: " + e.getMessage(), e);
             return packet;
         }    
     }
@@ -98,7 +85,7 @@ public sealed class SecurityLayer implements TransportMiddleware permits ClientS
         try {
             return packet.decryptData(this);
         } catch (SecureTransportException e) {
-            logger.log(System.Logger.Level.ERROR, "Failed to decrypt packet: " + e.getMessage(), e);
+            LOGGER.log(System.Logger.Level.ERROR, "Failed to decrypt packet: " + e.getMessage(), e);
             return packet;
         }
     }

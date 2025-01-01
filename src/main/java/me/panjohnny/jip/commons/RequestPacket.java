@@ -79,9 +79,9 @@ public class RequestPacket extends Packet {
     public static RequestPacket parse(Packet packet) {
         String data = new String(packet.getData());
         String[] lines = data.split("\n");
-        String[] versionResource = lines[0].split(" ");
+        String[] versionResource = lines[0].split(" ", 2);
         String version = versionResource[0];
-        String resource = versionResource[1];
+        String resource = versionResource[1].trim();
         HashMap<String, String> headers = new HashMap<>();
         byte[] body = new byte[0];
         for (int i = 1; i < lines.length; i++) {
@@ -89,8 +89,8 @@ public class RequestPacket extends Packet {
                 body = data.substring(i + 1).getBytes();
                 break;
             }
-            String[] header = lines[i].split(": ");
-            headers.put(header[0], header[1]);
+            String[] header = lines[i].split(":", 2);
+            headers.put(header[0].trim(), header[1].trim());
         }
         return new RequestPacket(version, resource, headers, body);
     }
