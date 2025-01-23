@@ -1,7 +1,8 @@
 package me.panjohnny.jip.client;
 
-import me.panjohnny.jip.commons.RequestPacket;
-import me.panjohnny.jip.commons.ResponsePacket;
+import me.panjohnny.jip.commons.Request;
+import me.panjohnny.jip.transport.packet.RequestPacket;
+import me.panjohnny.jip.transport.packet.ResponsePacket;
 import me.panjohnny.jip.security.ClientSecurityLayer;
 import me.panjohnny.jip.security.SecureTransportException;
 import me.panjohnny.jip.transport.Packet;
@@ -38,7 +39,7 @@ public final class ClientImpl extends Client {
             throw new IllegalStateException("Already connected to the server. Use connect(InetSocketAddress) to connect to another server.");
         }
         socket = new Socket();
-        socket.setSoTimeout(10000); // 10 sec timeout by default
+        //socket.setSoTimeout(60000); // 10 sec timeout by default
         if (socketConfigurator != null)
             socketConfigurator.accept(socket);
         socket.connect(address);
@@ -48,7 +49,7 @@ public final class ClientImpl extends Client {
         handshake();
 
         Packet serverReady = transportLayer.readPacket();
-        if (serverReady.getLength() != 1 || serverReady.getData()[0] != 1) {
+        if (serverReady == null || serverReady.getLength() != 1 || serverReady.getData().at(0)[0] != 1) {
             LOGGER.log(System.Logger.Level.ERROR, "Server is not ready to receive the request - Invalid server ready packet: {0}", serverReady);
             close();
         }
@@ -90,13 +91,18 @@ public final class ClientImpl extends Client {
     }
 
     @Override
-    public ResponsePacket fetch(RequestPacket requestPacket) throws SecureTransportException, IOException {
+    public ResponsePacket fetch(Request req) throws SecureTransportException, IOException {
         //connect()
         // Server is ready now
-        transportLayer.writePacket(requestPacket);
+        transportLayer.writePacket(req.fabricate());
 
+        var packet = transportLayer.readPacket();
+        if (packet == null) {
+            LOGGER.log(System.Logger.Level.ERROR, "Failed to read response packet from the server");
+            return null;
+        }
         //disconnect();
-        return ResponsePacket.parse(transportLayer.readPacket());
+        return ResponsePacket.parse(packet);
     }
 
     @Override

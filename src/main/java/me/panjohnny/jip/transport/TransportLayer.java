@@ -1,8 +1,11 @@
 package me.panjohnny.jip.transport;
 
+import me.panjohnny.jip.util.ByteUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.function.Consumer;
 
 public class TransportLayer {
     private final InputStream input;
@@ -22,15 +25,24 @@ public class TransportLayer {
         if (middleware != null) {
             packet = middleware.processWrite(packet);
         }
-        output.write(packet.serialize());
+        output.write(packet.length);
+        for (byte[] b : packet.getData().bytes()) {
+            output.write(b);
+        }
+        packet.free();
     }
 
+    /**
+     * Reads a packet from the input stream
+     * @return packet or null if the stream closed
+     * @throws IOException if an I/O error occurs
+     */
     public Packet readPacket() throws IOException {
         byte[] header = readN(4);
         if (header.length != 4) {
             return null;
         }
-        int len = (header[0] << 24) | (header[1] << 16) | (header[2] << 8) | header[3];
+        int len = ByteUtil.byteArray4ToInt(header);
         byte[] data = readN(len);
         Packet packet = new Packet(len, data);
         if (middleware != null) {

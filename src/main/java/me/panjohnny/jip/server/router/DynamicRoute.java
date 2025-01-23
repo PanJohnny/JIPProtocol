@@ -2,7 +2,9 @@ package me.panjohnny.jip.server.router;
 
 import me.panjohnny.jip.util.URLUtil;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Dynamic route, enables matching the path dynamically.
@@ -37,7 +39,7 @@ public final class DynamicRoute extends Route {
         return true;
     }
 
-    public HashMap<String, String> parseParameters(String path) {
+    public Map<String, String> parseParameters(String path) {
         String[] pathParts = URLUtil.isolateResource(path).split("/");
         String[] routeParts = this.path.split("/");
         HashMap<String, String> parameters = new HashMap<>();
@@ -47,6 +49,6 @@ public final class DynamicRoute extends Route {
             }
         }
 
-        return parameters;
+        return Collections.unmodifiableMap(parameters);
     }
 }

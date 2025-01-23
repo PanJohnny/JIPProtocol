@@ -57,6 +57,7 @@ public final class JIPServerImpl extends JIPServer {
     private void accept() {
         try {
             var socket = serverSocket.accept();
+            socket.setSoTimeout(10000);
             threadPool.submit(() -> {
                 try {
                     new ClientHandler(socket, router).handle();

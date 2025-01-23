@@ -2,67 +2,62 @@ package me.panjohnny.jip.transport;
 
 import me.panjohnny.jip.security.SecureTransportException;
 import me.panjohnny.jip.security.SecurityLayer;
+import me.panjohnny.jip.util.ByteUtil;
+import me.panjohnny.jip.util.Bytes;
+
+import java.util.Arrays;
 
 public class Packet {
     public byte[] length;
-    public byte[] data;
+    protected Bytes data;
 
     public Packet(byte[] length, byte[] data) {
         this.length = length;
-        this.data = data;
+        this.data = new Bytes(data);
     }
 
     public Packet(int length, byte[] data) {
-        this.length = new byte[] {
-            (byte) (length >> 24),
-            (byte) (length >> 16),
-            (byte) (length >> 8),
-            (byte) length
-        }; // max length is 2^32 - 1
-        this.data = data;
+        this.length = ByteUtil.intToByteArray4(length); // max length is 2^32 - 1
+        this.data = new Bytes(data);
     }
 
     public Packet() {
         length = new byte[4];
-        data = new byte[0];
+        this.data = new Bytes();
     }
 
     public void setLength(int length) {
-        this.length = new byte[] {
-            (byte) (length >> 24),
-            (byte) (length >> 16),
-            (byte) (length >> 8),
-            (byte) length
-        };
+        this.length = ByteUtil.intToByteArray4(length);
     }
 
     public int getLength() {
-        return (length[0] << 24) | (length[1] << 16) | (length[2] << 8) | length[3];
+        return ByteUtil.byteArray4ToInt(length);
     }
 
-    public void useData(byte[] data) {
+    public void useData(Bytes data) {
         this.data = data;
-        setLength(data.length);
+        setLength(data.length());
+    }
+
+    public Bytes getData() {
+        return data;
     }
 
     public void prepare() {
         // Do nothing by default
     }
 
-    public byte[] serialize() {
-        // length[4] + data[length]
-        byte[] packet = new byte[4 + data.length];
-        System.arraycopy(length, 0, packet, 0, 4);
-        System.arraycopy(data, 0, packet, 4, data.length);
-        return packet;
+    public void free() {
+        data.clear();
+        length = null;
     }
 
+    @Override
     public String toString() {
-        return new String(data);
-    }
-
-    public byte[] getData() {
-        return data;
+        return "Packet{" +
+                "length=" + Arrays.toString(length) +
+                ", data=" + data +
+                '}';
     }
 
     public Packet encryptData(SecurityLayer securityLayer) throws SecureTransportException {
@@ -71,7 +66,9 @@ public class Packet {
     }
 
     public Packet decryptData(SecurityLayer securityLayer) throws SecureTransportException {
-        useData(securityLayer.decrypt(data));
+        var arr = data.at(0);
+        arr = securityLayer.decrypt(arr);
+        useData(new Bytes(arr));
         return this;
     }
 }

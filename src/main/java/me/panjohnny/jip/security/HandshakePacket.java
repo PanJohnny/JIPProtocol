@@ -1,6 +1,7 @@
 package me.panjohnny.jip.security;
 
 import me.panjohnny.jip.transport.Packet;
+import me.panjohnny.jip.util.Bytes;
 
 /**
  * Handshake packet
@@ -12,11 +13,16 @@ import me.panjohnny.jip.transport.Packet;
 public class HandshakePacket extends Packet {
     public HandshakePacket(byte[] publicKey) {
         super();
-        this.data = publicKey;
+        this.data = new Bytes(publicKey);
     }
 
     @Override
-    public byte[] serialize() {
-        return data;
+    public void prepare() {
+        length = new byte[0]; // Handshake packet has no length
+    }
+
+    @Override
+    public int getLength() {
+        return -1;
     }
 }

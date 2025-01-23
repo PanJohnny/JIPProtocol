@@ -1,8 +1,10 @@
 package me.panjohnny.jip.client;
 
 
-import me.panjohnny.jip.commons.RequestPacket;
-import me.panjohnny.jip.commons.ResponsePacket;
+import me.panjohnny.jip.commons.JIPVersion;
+import me.panjohnny.jip.commons.Request;
+import me.panjohnny.jip.transport.packet.RequestPacket;
+import me.panjohnny.jip.transport.packet.ResponsePacket;
 import me.panjohnny.jip.security.SecureTransportException;
 
 import java.io.IOException;
@@ -48,14 +50,24 @@ public abstract sealed class Client permits ClientImpl {
     public abstract boolean isConnected();
 
     /**
-     * Fetches the response from the server
-     * @param requestPacket request to send to the server
+     * Fetches response from the server
+     * @param req request to send to the server
      * @return response from the server
      * @throws SecureTransportException if the secure transport layer fails
      * @throws IOException if an I/O error occurs
      */
-    public abstract ResponsePacket fetch(RequestPacket requestPacket) throws SecureTransportException, IOException;
+    public abstract ResponsePacket fetch(Request req) throws SecureTransportException, IOException;
 
+    /**
+     * Fetches response from the server
+     * @param resource path to the resource
+     * @return response from the server
+     * @throws SecureTransportException if the secure transport layer fails
+     * @throws IOException if an I/O error occurs
+     */
+    public ResponsePacket fetch(String resource) throws SecureTransportException, IOException {
+        return fetch(new Request(JIPVersion.getDefault().toString(), resource));
+    }
     /**
      * Closes the connection to the server
      * @throws IOException if an I/O error occurs

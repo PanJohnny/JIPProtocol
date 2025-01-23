@@ -4,8 +4,13 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
-import me.panjohnny.jip.commons.RequestPacket;
-import me.panjohnny.jip.commons.ResponsePacket;
+import me.panjohnny.jip.commons.JIPVersion;
+import me.panjohnny.jip.commons.Response;
+import me.panjohnny.jip.commons.StatusCodes;
+import me.panjohnny.jip.server.router.DynamicRoute;
+import me.panjohnny.jip.server.router.Route;
+import me.panjohnny.jip.transport.packet.RequestPacket;
+import me.panjohnny.jip.transport.packet.ResponsePacket;
 import me.panjohnny.jip.security.ServerSecurityLayer;
 import me.panjohnny.jip.server.router.Router;
 import me.panjohnny.jip.transport.Packet;
@@ -88,15 +93,24 @@ public class ClientHandler {
                 ready = false;
                 return;
             }
+
             RequestPacket requestPacket = RequestPacket.parse(packet);
 
-            if (router.hasRoute(requestPacket.getResource())) {
-                ResponsePacket responsePacket = ResponsePacket.OK;
-                router.getHandler(requestPacket.getResource()).handle(requestPacket, responsePacket);
-                transportLayer.writePacket(responsePacket);
+            Route route = router.getRoute(requestPacket.getResource());
+            if (route != null) {
+                var version = JIPVersion.getDefault().toString();
+                var status = StatusCodes.OK.toString();
+                Response response =  new Response(version, status);
+                var handler = router.getHandler(requestPacket.getResource());
+                if (route instanceof DynamicRoute dn) {
+                    var params = dn.parseParameters(requestPacket.getResource());
+                    handler.handle(requestPacket, response, params);
+                } else {
+                    handler.handle(requestPacket, response);
+                }
+                transportLayer.writePacket(response.fabricate());
             } else {
-                ResponsePacket responsePacket = new ResponsePacket("JIP/1.0", "Not Found");
-                transportLayer.writePacket(responsePacket);
+                //transportLayer.writePacket(Response.NOT_FOUND);
             }
             //transportLayer.flush();
         } catch (Exception e) {
