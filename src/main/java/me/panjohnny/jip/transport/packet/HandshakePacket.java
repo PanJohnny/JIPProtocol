@@ -1,4 +1,4 @@
-package me.panjohnny.jip.security;
+package me.panjohnny.jip.transport.packet;
 
 import me.panjohnny.jip.transport.Packet;
 import me.panjohnny.jip.util.Bytes;

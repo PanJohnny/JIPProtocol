@@ -7,11 +7,10 @@ import java.util.concurrent.TimeUnit;
 import me.panjohnny.jip.commons.JIPVersion;
 import me.panjohnny.jip.commons.Response;
 import me.panjohnny.jip.commons.StatusCodes;
+import me.panjohnny.jip.security.ServerSecurityLayer;
 import me.panjohnny.jip.server.router.DynamicRoute;
 import me.panjohnny.jip.server.router.Route;
 import me.panjohnny.jip.transport.packet.RequestPacket;
-import me.panjohnny.jip.transport.packet.ResponsePacket;
-import me.panjohnny.jip.security.ServerSecurityLayer;
 import me.panjohnny.jip.server.router.Router;
 import me.panjohnny.jip.transport.Packet;
 import me.panjohnny.jip.transport.TransportLayer;
@@ -67,7 +66,7 @@ public class ClientHandler {
         try {
             transportLayer.writePacket(new Packet(1, new byte[] {1}));
             ready = true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.log(System.Logger.Level.ERROR, "Failed to notify ready state, closing...", e);
         }
 

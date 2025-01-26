@@ -1,7 +1,6 @@
 package me.panjohnny.jip.util;
 
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.function.Consumer;
 
 public record Bytes(byte[]... bytes) {
@@ -11,14 +10,6 @@ public record Bytes(byte[]... bytes) {
             length += b.length;
         }
         return length;
-    }
-
-    public Bytes base64Encode() {
-        byte[][] encoded = new byte[bytes.length][];
-        for (int i = 0; i < bytes.length; i++) {
-            encoded[i] = Base64.getEncoder().encode(bytes[i]);
-        }
-        return new Bytes(encoded);
     }
 
     public Bytes append(byte[] arr) {

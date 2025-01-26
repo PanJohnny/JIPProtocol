@@ -1,10 +1,8 @@
 package me.panjohnny.jip.client;
 
 import me.panjohnny.jip.commons.Request;
-import me.panjohnny.jip.transport.packet.RequestPacket;
-import me.panjohnny.jip.transport.packet.ResponsePacket;
 import me.panjohnny.jip.security.ClientSecurityLayer;
-import me.panjohnny.jip.security.SecureTransportException;
+import me.panjohnny.jip.transport.packet.ResponsePacket;
 import me.panjohnny.jip.transport.Packet;
 import me.panjohnny.jip.transport.TransportLayer;
 
@@ -34,12 +32,12 @@ public final class ClientImpl extends Client {
     }
 
     @Override
-    public void connect() throws IOException, SecureTransportException {
+    public void connect() throws Exception {
         if (isConnected()) {
             throw new IllegalStateException("Already connected to the server. Use connect(InetSocketAddress) to connect to another server.");
         }
         socket = new Socket();
-        //socket.setSoTimeout(60000); // 10 sec timeout by default
+        socket.setSoTimeout(60000); // timeout minuta
         if (socketConfigurator != null)
             socketConfigurator.accept(socket);
         socket.connect(address);
@@ -56,7 +54,7 @@ public final class ClientImpl extends Client {
     }
 
     @Override
-    public void connect(InetSocketAddress address) throws SecureTransportException, IOException {
+    public void connect(InetSocketAddress address) throws Exception {
         if (isConnected()) {
             // Connect to another server
             this.address = address;
@@ -79,7 +77,7 @@ public final class ClientImpl extends Client {
             var serverHandshake = transportLayer.readN(256);
             securityLayer.acceptServerHandshake(serverHandshake);
             transportLayer.useMiddleware(securityLayer);
-        } catch (IOException | SecureTransportException e) {
+        } catch (Exception e) {
             LOGGER.log(System.Logger.Level.ERROR, "Failed to handshake with the server, closing...", e);
             try {
                 close();
@@ -91,7 +89,7 @@ public final class ClientImpl extends Client {
     }
 
     @Override
-    public ResponsePacket fetch(Request req) throws SecureTransportException, IOException {
+    public ResponsePacket fetch(Request req) throws Exception {
         //connect()
         // Server is ready now
         transportLayer.writePacket(req.fabricate());

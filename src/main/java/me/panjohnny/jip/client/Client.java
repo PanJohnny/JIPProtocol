@@ -33,7 +33,7 @@ public abstract sealed class Client permits ClientImpl {
      * @throws IOException if an I/O error occurs
      * @throws SecureTransportException if the secure transport layer fails
      */
-    public abstract void connect() throws IOException, SecureTransportException;
+    public abstract void connect() throws Exception;
 
     /**
      * Connects to the server with the given address
@@ -41,7 +41,7 @@ public abstract sealed class Client permits ClientImpl {
      * @throws SecureTransportException if the secure transport layer fails
      * @throws IOException if an I/O error occurs
      */
-    public abstract void connect(InetSocketAddress address) throws IOException, SecureTransportException;
+    public abstract void connect(InetSocketAddress address) throws Exception;
 
     /**
      * Checks if the client is connected to the server
@@ -56,7 +56,7 @@ public abstract sealed class Client permits ClientImpl {
      * @throws SecureTransportException if the secure transport layer fails
      * @throws IOException if an I/O error occurs
      */
-    public abstract ResponsePacket fetch(Request req) throws SecureTransportException, IOException;
+    public abstract ResponsePacket fetch(Request req) throws Exception;
 
     /**
      * Fetches response from the server
@@ -65,7 +65,7 @@ public abstract sealed class Client permits ClientImpl {
      * @throws SecureTransportException if the secure transport layer fails
      * @throws IOException if an I/O error occurs
      */
-    public ResponsePacket fetch(String resource) throws SecureTransportException, IOException {
+    public ResponsePacket fetch(String resource) throws Exception {
         return fetch(new Request(JIPVersion.getDefault().toString(), resource));
     }
     /**

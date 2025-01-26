@@ -10,10 +10,12 @@ public class RequestTimer {
         try {
             r = task.run();
         } catch (Exception e) {
-            LOGGER.log(System.Logger.Level.INFO, "[TASK FAILED] " + title, e);
+            LOGGER.log(System.Logger.Level.INFO, "[ŽÁDOST SELHALA] " + title, e);
+            return null;
         }
         long elapsed = System.nanoTime() - current;
-        LOGGER.log(System.Logger.Level.INFO, "[TIMER] {0} $$ {1} ms", title, elapsed/1_000_000);
+        //LOGGER.log(System.Logger.Level.INFO, "[MĚŘENÍ ÚSPĚŠNÉ] {0} $$ {1} ms", title, elapsed/1_000_000);
+        System.out.println(elapsed / 1_000_000);
         return r;
     }
 

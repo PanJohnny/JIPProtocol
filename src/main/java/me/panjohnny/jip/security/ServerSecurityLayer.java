@@ -1,5 +1,7 @@
 package me.panjohnny.jip.security;
 
+import me.panjohnny.jip.transport.packet.HandshakePacket;
+
 /**
  * Server security layer used to accept client handshake and send back RSA key. Every client has its own.
  *

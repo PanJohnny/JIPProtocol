@@ -4,6 +4,7 @@ import me.panjohnny.jip.transport.Packet;
 import me.panjohnny.jip.transport.TransportMiddleware;
 import me.panjohnny.jip.util.AESUtil;
 import me.panjohnny.jip.util.Bytes;
+import me.panjohnny.jip.util.IOProcessor;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
@@ -54,8 +55,7 @@ public sealed class SecurityLayer implements TransportMiddleware permits ClientS
     public Bytes encrypt(Bytes data) throws SecureTransportException {
         try {
             // Add Base64 encoding to the encrypted data
-            var encryptedData = AESUtil.encryptAES(data, aesKey);
-            return encryptedData.base64Encode();
+            return AESUtil.encryptAES(data, aesKey);
         } catch (Exception e) {
             throw new SecureTransportException("Failed to encrypt data with AES: " + e.getMessage(), e);
         }
@@ -63,27 +63,17 @@ public sealed class SecurityLayer implements TransportMiddleware permits ClientS
     
     public byte[] decrypt(byte[] encryptedData) throws SecureTransportException {
         try {
-            // Decode encrypted data for first part (until ==)
-            byte prev = 0;
-            ByteBuffer iv = ByteBuffer.allocate(AESUtil.IV_LENGTH_BASE64);
-            for (byte b : encryptedData) {
-                iv.put(b);
-                if (b == '=' && prev == '=') {
-                    break;
-                }
-                prev = b;
-            }
+            ByteBuffer iv = ByteBuffer.allocate(AESUtil.IV_LENGTH);
+            iv.put(encryptedData, 0, AESUtil.IV_LENGTH);
             // Decode Base64 before decrypting
-            var ivDec = Base64.getDecoder().decode(iv.array());
-            System.out.println(ivDec.length);
+            var ivDec = iv.array();
 
             // Decrypt the rest of the data
-            ByteBuffer encrypted = ByteBuffer.allocate(encryptedData.length - AESUtil.IV_LENGTH_BASE64);
-            for (int i = AESUtil.IV_LENGTH_BASE64; i < encryptedData.length; i++) {
+            ByteBuffer encrypted = ByteBuffer.allocate(encryptedData.length - AESUtil.IV_LENGTH);
+            for (int i = AESUtil.IV_LENGTH; i < encryptedData.length; i++) {
                 encrypted.put(encryptedData[i]);
             }
-            var encryptedDataDec = Base64.getDecoder().decode(encrypted.array());
-            System.out.println(encryptedDataDec.length);
+            var encryptedDataDec = encrypted.array();
 
             return AESUtil.decryptAES(encryptedDataDec, aesKey, ivDec);
         } catch (Exception e) {
@@ -110,5 +100,10 @@ public sealed class SecurityLayer implements TransportMiddleware permits ClientS
             LOGGER.log(System.Logger.Level.ERROR, "Failed to decrypt packet: " + e.getMessage(), e);
             return packet;
         }
+    }
+
+    @Override
+    public IOProcessor processIO(Packet packet) throws Exception {
+        return AESUtil.encryptStream(packet.getData(), this.aesKey, packet.getStreamLen());
     }
 }

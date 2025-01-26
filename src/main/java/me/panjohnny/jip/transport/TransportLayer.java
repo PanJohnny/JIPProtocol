@@ -1,11 +1,12 @@
 package me.panjohnny.jip.transport;
 
+import me.panjohnny.jip.util.AESUtil;
 import me.panjohnny.jip.util.ByteUtil;
+import me.panjohnny.jip.util.IOProcessor;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.function.Consumer;
 
 public class TransportLayer {
     private final InputStream input;
@@ -20,14 +21,29 @@ public class TransportLayer {
         this.middleware = middleware;
     }
 
-    public void writePacket(Packet packet) throws IOException {
+    public void writePacket(Packet packet) throws Exception {
         packet.prepare();
+        IOProcessor proc = null;
         if (middleware != null) {
-            packet = middleware.processWrite(packet);
+            if (packet.hasConnectedStream()) {
+                proc = middleware.processIO(packet);
+                packet.streamLen += AESUtil.IV_LENGTH;
+                packet.updateLen();
+            } else {
+                packet = middleware.processWrite(packet);
+            }
         }
+
         output.write(packet.length);
-        for (byte[] b : packet.getData().bytes()) {
-            output.write(b);
+
+        if (proc != null) {
+            proc.init(output);
+            proc.process(packet.getConnectedStream(), output);
+            proc.close(packet.getConnectedStream());
+        } else {
+            for (byte[] b : packet.getData().bytes()) {
+                output.write(b);
+            }
         }
         packet.free();
     }

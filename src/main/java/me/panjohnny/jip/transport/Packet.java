@@ -5,11 +5,14 @@ import me.panjohnny.jip.security.SecurityLayer;
 import me.panjohnny.jip.util.ByteUtil;
 import me.panjohnny.jip.util.Bytes;
 
+import java.io.InputStream;
 import java.util.Arrays;
 
 public class Packet {
     public byte[] length;
     protected Bytes data;
+    protected InputStream stream;
+    protected long streamLen = 0;
 
     public Packet(byte[] length, byte[] data) {
         this.length = length;
@@ -36,11 +39,38 @@ public class Packet {
 
     public void useData(Bytes data) {
         this.data = data;
-        setLength(data.length());
+        updateLen();
+    }
+
+    public void updateLen() {
+        setLength((int) (data.length() + streamLen));
     }
 
     public Bytes getData() {
         return data;
+    }
+
+    /**
+     * Connects a stream to this data socket. The stream is then encrypted and sent as the data.
+     * @param stream stream to connect to this packet
+     * @param len the amount of data to be read from the stream
+     */
+    public void connectStream(InputStream stream, long len) {
+        this.stream = stream;
+        this.streamLen = len;
+        updateLen();
+    }
+
+    public InputStream getConnectedStream() {
+        return stream;
+    }
+
+    public long getStreamLen() {
+        return streamLen;
+    }
+
+    public boolean hasConnectedStream() {
+        return getConnectedStream() != null;
     }
 
     public void prepare() {

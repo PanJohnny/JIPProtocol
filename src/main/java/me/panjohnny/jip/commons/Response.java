@@ -2,7 +2,7 @@ package me.panjohnny.jip.commons;
 
 import me.panjohnny.jip.transport.packet.ResponsePacket;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +13,8 @@ public class Response extends PacketFactory<ResponsePacket> {
     private String version;
     private HashMap<String, String> headers;
     private byte[] body;
+    private InputStream stream;
+    private long streamLen = 0;
 
     // public static final Response DEFAULT = new Response(JIPVersion.getDefault().toString(), StatusCodes.OK.toString());
     // public static final ResponsePacket NOT_FOUND = new ResponsePacket(JIPVersion.getDefault().toString(), StatusCodes.NOT_FOUND.toString(), null, null);
@@ -65,15 +67,19 @@ public class Response extends PacketFactory<ResponsePacket> {
 
     /**
      * Reads contents of the file and sets the body to them
-     * @param path path of the file
-     * @throws IOException if an I/ O error occurs reading from the stream
+     * @param file the file to be sent
      */
-    public void sendFile(String path) throws IOException {
-        this.body = Files.readAllBytes(Path.of(path));
+    public void sendFile(File file) throws FileNotFoundException {
+        stream = new FileInputStream(file);
+        streamLen = file.length();
     }
 
     @Override
     public ResponsePacket fabricate() {
-        return new ResponsePacket(version, status, headers, body);
+        var p = new ResponsePacket(version, status, headers, body);
+        if (stream != null) {
+            p.connectStream(stream, streamLen);
+        }
+        return p;
     }
 }

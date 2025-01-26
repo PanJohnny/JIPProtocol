@@ -1,6 +1,7 @@
 package me.panjohnny.jip.transport.packet;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,26 +69,40 @@ public class ResponsePacket extends Packet {
 
 
     public static ResponsePacket parse(Packet packet) {
-        var data = new String(packet.getData().at(0), StandardCharsets.UTF_8);
-        var lines = data.split("\n");
-        var versionStatus = lines[0].replace("\r", "").split(" ", 2);
-        var version = versionStatus[0];
-        var status = versionStatus[1];
-        var headers = new HashMap<String, String>();
-        StringBuilder body = new StringBuilder();
-        boolean isBody = false;
-        for (int i = 1; i < lines.length; i++) {
-            String line = lines[i];
-            if (line.equals("\r")) {
-                // The rest of the lines after this one is the request body
-                isBody = true;
-            } else if(isBody) {
-                body.append(line).append("\n");
-            } else {
-                var header = line.split(": ");
-                headers.put(header[0], header[1]);
+        byte[] data = packet.getData().at(0);
+        int headerEndIndex = -1;
+
+        // Find the end of the headers section
+        for (int i = 0; i < data.length; i++) {
+            if (data[i] == '\r' && data[i + 1] == '\n') {
+                headerEndIndex = i + 2;
+                break;
             }
         }
-        return new ResponsePacket(version, status, headers, body.toString().getBytes(StandardCharsets.UTF_8));
+
+        if (headerEndIndex == -1) {
+            throw new IllegalArgumentException("Invalid packet format: no header end found");
+        }
+
+        // Extract headers
+        String headersString = new String(data, 0, headerEndIndex, StandardCharsets.UTF_8);
+        String[] lines = headersString.split("\r\n");
+        String[] versionStatus = lines[0].split(" ", 2);
+        String version = versionStatus[0];
+        String status = versionStatus[1].trim();
+        HashMap<String, String> headers = new HashMap<>();
+
+        for (int i = 1; i < lines.length; i++) {
+            if (lines[i].isEmpty()) {
+                break;
+            }
+            String[] header = lines[i].split(":", 2);
+            headers.put(header[0].trim(), header[1].trim());
+        }
+
+        // Extract body
+        byte[] body = Arrays.copyOfRange(data, headerEndIndex, data.length);
+
+        return new ResponsePacket(version, status, headers, body);
     }
 }

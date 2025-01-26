@@ -1,5 +1,7 @@
 package me.panjohnny.jip.security;
 
+import me.panjohnny.jip.transport.packet.HandshakePacket;
+
 import javax.crypto.Cipher;
 
 import java.security.*;
