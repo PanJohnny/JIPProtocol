@@ -6,7 +6,7 @@ public class RequestTimer {
     private static final System.Logger LOGGER = System.getLogger("RequestTimer");
     public static ResponsePacket watch(Task task, String title) {
         long current = System.nanoTime();
-        ResponsePacket r = null;
+        ResponsePacket r;
         try {
             r = task.run();
         } catch (Exception e) {
@@ -19,6 +19,7 @@ public class RequestTimer {
         return r;
     }
 
+    @SuppressWarnings("RedundantThrows")
     public interface Task {
         ResponsePacket run() throws Exception;
     }

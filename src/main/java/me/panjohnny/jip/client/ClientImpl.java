@@ -37,7 +37,7 @@ public final class ClientImpl extends Client {
             throw new IllegalStateException("Already connected to the server. Use connect(InetSocketAddress) to connect to another server.");
         }
         socket = new Socket();
-        socket.setSoTimeout(60000); // timeout minuta
+        socket.setSoTimeout(60000); // timeout one minute
         if (socketConfigurator != null)
             socketConfigurator.accept(socket);
         socket.connect(address);

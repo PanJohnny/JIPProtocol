@@ -8,7 +8,7 @@ package me.panjohnny.jip.server.router;
  * @author Jan Štefanča
  */
 public abstract sealed class Route permits StaticRoute, DynamicRoute {
-    protected String path;
+    protected final String path;
     public Route(String path) {
         this.path = path;
     }

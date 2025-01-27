@@ -11,8 +11,6 @@ import java.security.SecureRandom;
 
 public class AESUtil {
     public static final int IV_LENGTH = 16;
-    // With added padding for == at the end
-    public static final int IV_LENGTH_BASE64 = (int) Math.ceil(4 * (IV_LENGTH / 3.0)) + 2;
 
     public static SecretKey generateAESKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
@@ -25,7 +23,7 @@ public class AESUtil {
      *
      * @param data data to encrypt
      * @param key  key to use for encryption
-     * @return a bytepair containing the IV and the encrypted data
+     * @return a byte pair containing the IV and the encrypted data
      * @throws Exception if encryption fails
      */
     public static Bytes encryptAES(Bytes data, SecretKey key) throws Exception {

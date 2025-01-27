@@ -16,7 +16,7 @@ public final class ServerSecurityLayer extends SecurityLayer {
         this.rsaEncryptedAESKey = encryptRSA(key.getEncoded(), handshake);
     }
 
-    public HandshakePacket createHandshakePacket() throws Exception {
+    public HandshakePacket createHandshakePacket() {
         return new HandshakePacket(rsaEncryptedAESKey);
     }
 }

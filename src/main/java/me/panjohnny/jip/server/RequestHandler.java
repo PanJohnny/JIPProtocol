@@ -8,6 +8,6 @@ import java.util.Map;
 public interface RequestHandler {
     default void handle(RequestPacket req, Response res) {
         handle(req, res, null);
-    };
+    }
     void handle(RequestPacket req, Response res, Map<String, String> params);
 }

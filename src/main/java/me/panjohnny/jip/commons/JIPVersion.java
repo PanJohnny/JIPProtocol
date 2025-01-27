@@ -1,5 +1,6 @@
 package me.panjohnny.jip.commons;
 
+@SuppressWarnings("SameParameterValue")
 public enum JIPVersion {
     JIP1_0("JIP/1.0");
 
@@ -13,6 +14,7 @@ public enum JIPVersion {
         return version;
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static JIPVersion getDefault() {
         return JIPVersion.JIP1_0; // Going through versions would be O(n), when hardcoded this is O(1)
     }

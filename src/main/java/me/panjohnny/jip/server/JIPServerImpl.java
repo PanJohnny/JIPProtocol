@@ -80,7 +80,7 @@ public final class JIPServerImpl extends JIPServer {
 
     @Override
     public boolean isRunning() {
-        return false;
+        return running;
     }
 
     @Override
