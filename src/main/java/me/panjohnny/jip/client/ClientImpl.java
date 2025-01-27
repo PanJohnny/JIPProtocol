@@ -12,7 +12,7 @@ import java.net.Socket;
 import java.util.function.Consumer;
 
 /**
- * An implementation of JIP Client. By default, there is 10 second SO timeout. Before connecting to the server call to {@link Client#connect()} is required. After sending all request to the server use {@link Client#disconnect()}
+ * An implementation of JIP Client. By default, there is 10 second SO timeout. Before connecting to the server call to {@link Client#connect()} is required. After sending all request to the server use {@link Client#close()}
  *
  * @see Client
  * @see Socket#setSoTimeout(int) 

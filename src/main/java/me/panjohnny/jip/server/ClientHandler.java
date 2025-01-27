@@ -109,7 +109,10 @@ public class ClientHandler {
                 }
                 transportLayer.writePacket(response.fabricate());
             } else {
-                //transportLayer.writePacket(Response.NOT_FOUND);
+                var version = JIPVersion.getDefault().toString();
+                var status = StatusCode.NOT_FOUND.toString();
+                Response response =  new Response(version, status);
+                transportLayer.writePacket(response.fabricate());
             }
             //transportLayer.flush();
         } catch (Exception e) {

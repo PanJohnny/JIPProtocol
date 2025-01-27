@@ -14,9 +14,6 @@ public class Response extends PacketFactory<ResponsePacket> {
     private InputStream stream;
     private long streamLen = 0;
 
-    // public static final Response DEFAULT = new Response(JIPVersion.getDefault().toString(), StatusCodes.OK.toString());
-    // public static final ResponsePacket NOT_FOUND = new ResponsePacket(JIPVersion.getDefault().toString(), StatusCodes.NOT_FOUND.toString(), null, null);
-
     /**
      * Creates a new response with given version and status.
      * @param version see {@link JIPVersion}

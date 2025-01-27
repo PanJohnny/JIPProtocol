@@ -3,7 +3,6 @@ package me.panjohnny.jip.client;
 
 import me.panjohnny.jip.commons.JIPVersion;
 import me.panjohnny.jip.commons.Request;
-import me.panjohnny.jip.transport.packet.RequestPacket;
 import me.panjohnny.jip.transport.packet.ResponsePacket;
 import me.panjohnny.jip.security.SecureTransportException;
 

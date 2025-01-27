@@ -4,7 +4,6 @@ import me.panjohnny.jip.transport.packet.RequestPacket;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Request extends PacketFactory<RequestPacket> {
     private String version;
