@@ -6,12 +6,14 @@ import me.panjohnny.jip.util.AESUtil;
 import me.panjohnny.jip.util.Bytes;
 import me.panjohnny.jip.util.IOProcessor;
 
-import javax.crypto.*;
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.*;
 
 /**
  * A layer for encrypting and decrypting packets. Works as a middleware.

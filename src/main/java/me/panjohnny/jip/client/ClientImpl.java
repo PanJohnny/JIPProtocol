@@ -2,9 +2,9 @@ package me.panjohnny.jip.client;
 
 import me.panjohnny.jip.commons.Request;
 import me.panjohnny.jip.security.ClientSecurityLayer;
-import me.panjohnny.jip.transport.packet.ResponsePacket;
 import me.panjohnny.jip.transport.Packet;
 import me.panjohnny.jip.transport.TransportLayer;
+import me.panjohnny.jip.transport.packet.ResponsePacket;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

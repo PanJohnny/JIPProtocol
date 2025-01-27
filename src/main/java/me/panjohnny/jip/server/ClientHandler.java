@@ -1,19 +1,19 @@
 package me.panjohnny.jip.server;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.concurrent.TimeUnit;
-
 import me.panjohnny.jip.commons.JIPVersion;
 import me.panjohnny.jip.commons.Response;
 import me.panjohnny.jip.commons.StatusCode;
 import me.panjohnny.jip.security.ServerSecurityLayer;
 import me.panjohnny.jip.server.router.DynamicRoute;
 import me.panjohnny.jip.server.router.Route;
-import me.panjohnny.jip.transport.packet.RequestPacket;
 import me.panjohnny.jip.server.router.Router;
 import me.panjohnny.jip.transport.Packet;
 import me.panjohnny.jip.transport.TransportLayer;
+import me.panjohnny.jip.transport.packet.RequestPacket;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Handles client requests.

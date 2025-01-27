@@ -1,13 +1,13 @@
 package me.panjohnny.jip.transport.packet;
 
+import me.panjohnny.jip.transport.Packet;
+import me.panjohnny.jip.util.Bytes;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import me.panjohnny.jip.transport.Packet;
-import me.panjohnny.jip.util.Bytes;
 
 /**
  * A packet representing request.
