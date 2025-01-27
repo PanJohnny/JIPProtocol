@@ -71,6 +71,7 @@ public abstract sealed class Client permits ClientImpl {
      * Checks if the client socket is closed
      * @return true if the client socket is closed, false otherwise
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public abstract boolean isClosed();
 
     /**
