@@ -23,6 +23,12 @@ public class Request extends PacketFactory<RequestPacket> {
         this.headers = new HashMap<>();
     }
 
+    public Request(JIPVersion version, String resource) {
+        this.version = version.toString();
+        this.resource = resource;
+        this.headers = new HashMap<>();
+    }
+
     public String getVersion() {
         return version;
     }

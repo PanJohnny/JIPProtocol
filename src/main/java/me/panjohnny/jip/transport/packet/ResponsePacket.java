@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import me.panjohnny.jip.commons.StatusCode;
 import me.panjohnny.jip.transport.Packet;
 import me.panjohnny.jip.util.Bytes;
 
@@ -44,6 +45,14 @@ public class ResponsePacket extends Packet {
 
     public byte[] getBody() {
         return body;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public StatusCode getStatusCode() {
+        return StatusCode.getFromCode(status);
     }
 
     @Override

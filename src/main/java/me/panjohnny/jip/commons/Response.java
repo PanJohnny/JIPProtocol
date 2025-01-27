@@ -4,12 +4,10 @@ import me.panjohnny.jip.transport.packet.ResponsePacket;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 
 public class Response extends PacketFactory<ResponsePacket> {
-    private final String status;
+    private String status;
     private String version;
     private HashMap<String, String> headers;
     private byte[] body;
@@ -22,7 +20,7 @@ public class Response extends PacketFactory<ResponsePacket> {
     /**
      * Creates a new response with given version and status.
      * @param version see {@link JIPVersion}
-     * @param status see {@link StatusCodes}
+     * @param status see {@link StatusCode}
      */
     public Response(String version, String status) {
         this.version = version;
@@ -55,6 +53,18 @@ public class Response extends PacketFactory<ResponsePacket> {
 
     public void setBody(byte[] body) {
         this.body = body;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setStatus(StatusCode code) {
+        this.status = code.toString();
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     /**

@@ -36,18 +36,12 @@ public abstract sealed class Client permits ClientImpl {
     public abstract void connect() throws Exception;
 
     /**
-     * Connects to the server with the given address
+     * Connects to the server with the given address. If the client is already connected, it reconnects to the new address
      * @param address address of the server
      * @throws SecureTransportException if the secure transport layer fails
      * @throws IOException if an I/O error occurs
      */
     public abstract void connect(InetSocketAddress address) throws Exception;
-
-    /**
-     * Checks if the client is connected to the server
-     * @return true if the client is connected, false otherwise
-     */
-    public abstract boolean isConnected();
 
     /**
      * Fetches response from the server
@@ -97,10 +91,6 @@ public abstract sealed class Client permits ClientImpl {
         return new ClientImpl(address);
     }
 
-    /**
-     * Disconnects from the server
-     */
-    public abstract void disconnect() throws IOException;
 
     /**
      * Set a consumer to further configure the socket when connecting to the server

@@ -33,7 +33,7 @@ public final class ClientImpl extends Client {
 
     @Override
     public void connect() throws Exception {
-        if (isConnected()) {
+        if (!isClosed()) {
             throw new IllegalStateException("Already connected to the server. Use connect(InetSocketAddress) to connect to another server.");
         }
         socket = new Socket();
@@ -55,19 +55,13 @@ public final class ClientImpl extends Client {
 
     @Override
     public void connect(InetSocketAddress address) throws Exception {
-        if (isConnected()) {
-            // Connect to another server
+        if (!isClosed()) {
             this.address = address;
             socket.connect(address);
         } else {
             this.address = address;
             connect();
         }
-    }
-
-    @Override
-    public boolean isConnected() {
-        return socket != null && socket.isConnected();
     }
 
     private void handshake() {
@@ -111,12 +105,6 @@ public final class ClientImpl extends Client {
     @Override
     public boolean isClosed() {
         return socket != null && socket.isClosed();
-    }
-
-    @Override
-    public void disconnect() throws IOException {
-        close();
-        socket = null;
     }
 
     @Override

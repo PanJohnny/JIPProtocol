@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import me.panjohnny.jip.commons.JIPVersion;
 import me.panjohnny.jip.commons.Response;
-import me.panjohnny.jip.commons.StatusCodes;
+import me.panjohnny.jip.commons.StatusCode;
 import me.panjohnny.jip.security.ServerSecurityLayer;
 import me.panjohnny.jip.server.router.DynamicRoute;
 import me.panjohnny.jip.server.router.Route;
@@ -98,7 +98,7 @@ public class ClientHandler {
             Route route = router.getRoute(requestPacket.getResource());
             if (route != null) {
                 var version = JIPVersion.getDefault().toString();
-                var status = StatusCodes.OK.toString();
+                var status = StatusCode.OK.toString();
                 Response response =  new Response(version, status);
                 var handler = router.getHandler(requestPacket.getResource());
                 if (route instanceof DynamicRoute dn) {
