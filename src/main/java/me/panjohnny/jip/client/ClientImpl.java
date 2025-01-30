@@ -2,6 +2,7 @@ package me.panjohnny.jip.client;
 
 import me.panjohnny.jip.commons.Request;
 import me.panjohnny.jip.security.ClientSecurityLayer;
+import me.panjohnny.jip.security.SecureTransportException;
 import me.panjohnny.jip.transport.Packet;
 import me.panjohnny.jip.transport.TransportLayer;
 import me.panjohnny.jip.transport.packet.ResponsePacket;
@@ -34,7 +35,7 @@ public final class ClientImpl extends Client {
     @Override
     public void connect() throws Exception {
         if (!isClosed()) {
-            throw new IllegalStateException("Already connected to the server. Use connect(InetSocketAddress) to connect to another server.");
+            throw new IllegalStateException("Klient je připojen k serveru. Použijte #connect(InetSocketAddress) k přepojení na jinou adresu, nebo #close k uzavření spojení.");
         }
         socket = new Socket();
         socket.setSoTimeout(60000); // timeout one minute
@@ -48,8 +49,8 @@ public final class ClientImpl extends Client {
 
         Packet serverReady = transportLayer.readPacket();
         if (serverReady == null || serverReady.getLength() != 1 || serverReady.getData().at(0)[0] != 1) {
-            LOGGER.log(System.Logger.Level.ERROR, "Server is not ready to receive the request - Invalid server ready packet: {0}", serverReady);
             close();
+            throw new SecureTransportException("Nepodařilo se navázat zabezpečného spojení. Server vrátil špatnou odpověď.");
         }
     }
 
@@ -64,7 +65,7 @@ public final class ClientImpl extends Client {
         }
     }
 
-    private void handshake() {
+    private void handshake() throws SecureTransportException {
         try {
             var handshake = securityLayer.createHandshakePacket();
             transportLayer.writePacket(handshake);
@@ -72,13 +73,14 @@ public final class ClientImpl extends Client {
             securityLayer.acceptServerHandshake(serverHandshake);
             transportLayer.useMiddleware(securityLayer);
         } catch (Exception e) {
-            LOGGER.log(System.Logger.Level.ERROR, "Failed to handshake with the server, closing...", e);
+            LOGGER.log(System.Logger.Level.ERROR, "Nepodařilo se dokončit proces handshake, uzavírám soket...", e);
             try {
                 close();
             } catch (IOException e1) {
-                LOGGER.log(System.Logger.Level.ERROR, "Failed to close transport layer: " + e1.getMessage(), e1);
+                LOGGER.log(System.Logger.Level.ERROR, "Nepodařilo se uzavřít transportní vrstvu: " + e1.getMessage(), e1);
                 throw new RuntimeException(e1);
             }
+            throw new SecureTransportException("Nepodařilo se dokončit proces handshake", e);
         }
     }
 

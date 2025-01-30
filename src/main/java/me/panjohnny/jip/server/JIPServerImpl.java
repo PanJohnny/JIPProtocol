@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class JIPServerImpl extends JIPServer {
+    public static final System.Logger LOGGER = System.getLogger(JIPServerImpl.class.getName());
     private ExecutorService threadPool;
     private ServerSocket serverSocket;
     private boolean running;
@@ -38,8 +39,7 @@ public final class JIPServerImpl extends JIPServer {
                 if (!running) {
                     return;
                 }
-                System.Logger logger = System.getLogger(JIPServerImpl.class.getName());
-                logger.log(System.Logger.Level.ERROR, "Failed to accept a client", e);
+                LOGGER.log(System.Logger.Level.WARNING, "Nepovedlo se přijmout klienta", e);
             }
         });
         running = true;
@@ -57,7 +57,7 @@ public final class JIPServerImpl extends JIPServer {
     private void accept() {
         try {
             var socket = serverSocket.accept();
-            socket.setSoTimeout(30000); // 30 seconds
+            socket.setSoTimeout(30000); // po 30 sekundách bude klient odpojen
             threadPool.submit(() -> {
                 try {
                     new ClientHandler(socket, router).handle();
@@ -65,16 +65,14 @@ public final class JIPServerImpl extends JIPServer {
                     if (!running) {
                         return;
                     }
-                    System.Logger logger = System.getLogger(JIPServerImpl.class.getName());
-                    logger.log(System.Logger.Level.ERROR, "Failed to create a client handler", e);
+                    LOGGER.log(System.Logger.Level.WARNING, "Nepodařilo se vytvořit ", e);
                 }
             });
         } catch (IOException e) {
             if (!running) {
                 return;
             }
-            System.Logger logger = System.getLogger(JIPServerImpl.class.getName());
-            logger.log(System.Logger.Level.ERROR, "Failed to accept a client", e);
+            LOGGER.log(System.Logger.Level.WARNING, "Nepodařilo se přijmout připojení klienta", e);
         }
     }
 
