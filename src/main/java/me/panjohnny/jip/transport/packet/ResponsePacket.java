@@ -11,13 +11,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A packet representing response sent from the server.
+ * A packet representing response sent from the server. Please note that packets are immutable.
  *
  * @author Jan Štefanča
  * @see Packet
  * @see me.panjohnny.jip.transport.TransportLayer
  * @see me.panjohnny.jip.commons.Response
- * @implNote Please note that packets are immutable.
  */
 public class ResponsePacket extends Packet {
     private final String version;

@@ -10,13 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A packet representing request.
+ * A packet representing request. Please note that packets are immutable.
  *
  * @author Jan Štefanča
  * @see Packet
  * @see me.panjohnny.jip.transport.TransportLayer
  * @see me.panjohnny.jip.commons.Request
- * @implNote Please note that packets are immutable.
  */
 public class RequestPacket extends Packet {
     private final String version;
