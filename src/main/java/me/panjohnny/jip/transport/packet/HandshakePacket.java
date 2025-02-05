@@ -4,11 +4,13 @@ import me.panjohnny.jip.transport.Packet;
 import me.panjohnny.jip.util.Bytes;
 
 /**
- * Handshake packet
+ * Handshake paket
  *
- * <p>Packet used to establish a secure connection between the client and the server.</p>
+ * <p>Paket používaný k navázání zabezpečeného spojení mezi klientem a serverem.</p>
+ *
  * @author Jan Štefanča
  * @see Packet
+ * @since 1.0
  */
 public class HandshakePacket extends Packet {
     public HandshakePacket(byte[] publicKey) {
@@ -18,7 +20,7 @@ public class HandshakePacket extends Packet {
 
     @Override
     public void prepare() {
-        length = new byte[0]; // Handshake packet has no length
+        length = new byte[0]; // Handshake paket nemá délku
     }
 
     @Override

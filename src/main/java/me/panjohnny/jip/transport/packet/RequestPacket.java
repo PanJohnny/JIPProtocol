@@ -10,12 +10,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A packet representing request. Please note that packets are immutable.
+ * Paket představující požadavek. Pakety jsou neměnné!
  *
  * @author Jan Štefanča
  * @see Packet
  * @see me.panjohnny.jip.transport.TransportLayer
  * @see me.panjohnny.jip.commons.Request
+ * @since 1.0
  */
 public class RequestPacket extends Packet {
     private final String version;
@@ -23,6 +24,14 @@ public class RequestPacket extends Packet {
     private final Map<String, String> headers;
     private final byte[] body;
 
+    /**
+     * Vytvoří nový RequestPacket se specifikovanou verzí, zdrojem, hlavičkami a tělem.
+     *
+     * @param version  verze požadavku
+     * @param resource zdroj požadavku
+     * @param headers  hlavičky požadavku
+     * @param body     tělo požadavku
+     */
     public RequestPacket(String version, String resource, Map<String, String> headers, byte[] body) {
         super();
         this.version = version;
@@ -31,6 +40,13 @@ public class RequestPacket extends Packet {
         this.body = body;
     }
 
+    /**
+     * Vytvoří nový RequestPacket se specifikovanou verzí, zdrojem a tělem.
+     *
+     * @param version  verze požadavku
+     * @param resource zdroj požadavku
+     * @param body     tělo požadavku
+     */
     public RequestPacket(String version, String resource, byte[] body) {
         super();
         this.version = version;
@@ -39,6 +55,12 @@ public class RequestPacket extends Packet {
         this.body = body;
     }
 
+    /**
+     * Vytvoří nový RequestPacket se specifikovanou verzí a zdrojem.
+     *
+     * @param version  verze požadavku
+     * @param resource zdroj požadavku
+     */
     public RequestPacket(String version, String resource) {
         super();
         this.version = version;
@@ -47,27 +69,48 @@ public class RequestPacket extends Packet {
         this.body = new byte[0];
     }
 
+    /**
+     * @return verze žádosti
+     * @see me.panjohnny.jip.commons.JIPVersion
+     */
     public String getVersion() {
         return version;
     }
 
+    /**
+     * @return cesta žádosti
+     */
     public String getResource() {
         return resource;
     }
 
+    /**
+     * @return hlavičky žádosti
+     */
     public Map<String, String> getHeaders() {
         return headers;
     }
 
+    /**
+     * @return tělo žádosti
+     */
     public byte[] getBody() {
         return body;
     }
 
+    /**
+     * Připraví paket pro přenos
+     */
     @Override
     public void prepare() {
         useData(toBytes());
     }
 
+    /**
+     * Konvertuje paket na bajty.
+     *
+     * @return bajty
+     */
     public Bytes toBytes() {
         StringBuilder sb = new StringBuilder();
         sb.append(version).append(" ").append(resource).append("\n");
@@ -84,11 +127,17 @@ public class RequestPacket extends Packet {
         return new Bytes(headerBytes, body);
     }
 
+    /**
+     * Převede paket na RequestPacket
+     *
+     * @param packet paket na převedení
+     * @return převedený paket
+     */
     public static RequestPacket parse(Packet packet) {
         byte[] data = packet.getData().at(0);
         int headerEndIndex = -1;
 
-        // Find the end of the headers section
+        // Najde konec sekce hlaviček
         for (int i = 0; i < data.length; i++) {
             if (data[i] == '\r' && data[i + 1] == '\n') {
                 headerEndIndex = i + 2;
@@ -97,10 +146,10 @@ public class RequestPacket extends Packet {
         }
 
         if (headerEndIndex == -1) {
-            throw new IllegalArgumentException("Invalid packet format: no header end found");
+            throw new IllegalArgumentException("Neplatný formát paketu: nebyl nalezen konec hlavičky");
         }
 
-        // Extract headers
+        // Extrahuje hlavičky
         String headersString = new String(data, 0, headerEndIndex, StandardCharsets.UTF_8);
         String[] lines = headersString.split("\r\n");
         String[] versionResource = lines[0].split(" ", 2);
@@ -116,7 +165,7 @@ public class RequestPacket extends Packet {
             headers.put(header[0].trim(), header[1].trim());
         }
 
-        // Extract body
+        // Extrahuje tělo
         byte[] body = Arrays.copyOfRange(data, headerEndIndex, data.length);
 
         return new RequestPacket(version, resource, headers, body);

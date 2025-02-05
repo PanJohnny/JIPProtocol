@@ -7,20 +7,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Dynamic route, enables matching the path dynamically.
+ * Dynamická trasa, umožňuje dynamické porovnávání cesty.
  * <p>
- * <h2>Dynamic path matching</h2>
- * - Routes with [] are dynamic routes.
- * - For example, if the path is "/home/[id]", it will match "/home/1", "/home/2", etc.
- * - You can nest dynamic routes, for example, "/home/[id]/[action]" will match "/home/1/edit", "/home/2/delete", etc.
- * @see StaticRoute
+ * <h2>Dynamické porovnávání cesty</h2>
+ * - Trasy s [] jsou dynamické trasy.
+ * - Například, pokud je cesta "/home/[id]", bude odpovídat "/home/1", "/home/2", atd.
+ * - Můžete vnořit dynamické trasy, například "/home/[id]/[action]" bude odpovídat "/home/1/edit", "/home/2/delete", atd.
+ *
  * @author Jan Štefanča
+ * @see StaticRoute
+ * @since 1.0
  */
 public final class DynamicRoute extends Route {
+    /**
+     * Vytvoří novou dynamickou trasu s danou cestou.
+     *
+     * @param path cesta trasy
+     */
     public DynamicRoute(String path) {
         super(URLUtil.isolateResource(path));
     }
 
+    /**
+     * Porovná, zda daná cesta odpovídá této dynamické trase.
+     *
+     * @param path cesta k porovnání
+     * @return true, pokud cesta odpovídá, jinak false
+     */
     @Override
     public boolean matches(String path) {
         String[] pathParts = URLUtil.isolateResource(path).split("/");
@@ -39,6 +52,12 @@ public final class DynamicRoute extends Route {
         return true;
     }
 
+    /**
+     * Analyzuje parametry z dané cesty.
+     *
+     * @param path cesta k analýze
+     * @return nemodifikovatelná mapa parametrů
+     */
     public Map<String, String> parseParameters(String path) {
         String[] pathParts = URLUtil.isolateResource(path).split("/");
         String[] routeParts = this.path.split("/");

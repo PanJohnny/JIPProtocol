@@ -9,9 +9,24 @@ import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+/**
+ * Utilitní třída pro šifrování a dešifrování pomocí AES.
+ * <p>
+ * Třída poskytuje metody pro generování klíčů, šifrování a dešifrování dat a datových proudů.
+ * </p>
+ *
+ * @author Jan Štefanča
+ * @since 1.0
+ */
 public class AESUtil {
     public static final int IV_LENGTH = 16;
 
+    /**
+     * Generuje nový AES klíč.
+     *
+     * @return vygenerovaný AES klíč
+     * @throws NoSuchAlgorithmException pokud algoritmus AES není dostupný
+     */
     public static SecretKey generateAESKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
         keyGen.init(256); // AES-256
@@ -19,24 +34,20 @@ public class AESUtil {
     }
 
     /**
-     * Encrypts data using AES encryption with a given key.
+     * Šifruje data pomocí AES šifrování s daným klíčem.
      *
-     * @param data data to encrypt
-     * @param key  key to use for encryption
-     * @return a byte pair containing the IV and the encrypted data
-     * @throws Exception if encryption fails
+     * @param data data k zašifrování
+     * @param key  klíč pro šifrování
+     * @return bajty obsahující IV a zašifrovaná data
+     * @throws Exception pokud šifrování selže
      */
     public static Bytes encryptAES(Bytes data, SecretKey key) throws Exception {
         Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "SunJCE");
-        // Generate a random IV (Initialization Vector)
         byte[] iv = new byte[cipher.getBlockSize()];
         SecureRandom random = new SecureRandom();
         random.nextBytes(iv);
         IvParameterSpec ivParams = new IvParameterSpec(iv);
         cipher.init(Cipher.ENCRYPT_MODE, key, ivParams);
-
-        //ByteBuffer.allocate(120).put();
-
 
         for (byte[] chunk : data.bytes()) {
             cipher.update(chunk, 0, chunk.length, chunk, 0);
@@ -46,9 +57,17 @@ public class AESUtil {
         return data.prepend(iv);
     }
 
+    /**
+     * Šifruje datový proud pomocí AES šifrování s daným klíčem.
+     *
+     * @param data      data k zašifrování
+     * @param key       klíč pro šifrování
+     * @param streamLen délka datového proudu
+     * @return IOProcessor pro zpracování šifrovaného datového proudu
+     * @throws Exception pokud šifrování selže
+     */
     public static IOProcessor encryptStream(Bytes data, SecretKey key, long streamLen) throws Exception {
         Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "SunJCE");
-        // Generate a random IV (Initialization Vector)
         byte[] iv = new byte[cipher.getBlockSize()];
         SecureRandom random = new SecureRandom();
         random.nextBytes(iv);
@@ -84,6 +103,15 @@ public class AESUtil {
         };
     }
 
+    /**
+     * Dešifruje data pomocí AES šifrování s daným klíčem a IV.
+     *
+     * @param encryptedData zašifrovaná data
+     * @param key           klíč pro dešifrování
+     * @param iv            inicializační vektor
+     * @return dešifrovaná data
+     * @throws Exception pokud dešifrování selže
+     */
     public static byte[] decryptAES(byte[] encryptedData, SecretKey key, byte[] iv) throws Exception {
         Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding", "SunJCE");
         IvParameterSpec ivParams = new IvParameterSpec(iv);

@@ -8,6 +8,14 @@ import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Implementace serveru JIP. Pro vytvoření instance využijte {@link JIPServer#create(InetSocketAddress)}.
+ *
+ * @author Jan Štefanča
+ * @see JIPServer
+ * @see ClientHandler
+ * @since 1.0
+ */
 public final class JIPServerImpl extends JIPServer {
     public static final System.Logger LOGGER = System.getLogger(JIPServerImpl.class.getName());
     private ExecutorService threadPool;
@@ -15,18 +23,35 @@ public final class JIPServerImpl extends JIPServer {
     private boolean running;
     private Thread acceptThread;
     private Router router;
+
+    /**
+     * Vytvoří novou instanci serveru JIP.
+     *
+     * @param address adresa serveru
+     */
     public JIPServerImpl(InetSocketAddress address) {
         super(address);
         router = new Router();
     }
 
+    /**
+     * Vytvoří novou instanci serveru JIP s definovanou velikostí thread poolu.
+     *
+     * @param address        adresa serveru
+     * @param threadPoolSize velikost thread poolu
+     */
     public JIPServerImpl(InetSocketAddress address, int threadPoolSize) {
         super(address, threadPoolSize);
     }
 
+    /**
+     * Spustí server.
+     *
+     * @throws IOException pokud dojde k I/O erroru
+     */
     @Override
     public void start() throws IOException {
-        // Create threadPool
+        // Vytvoří thread pool
         threadPool = Executors.newFixedThreadPool(threadPoolSize);
         serverSocket = new ServerSocket();
         serverSocket.bind(address);
@@ -46,6 +71,12 @@ public final class JIPServerImpl extends JIPServer {
         acceptThread.start();
     }
 
+    /**
+     * Zastaví server.
+     *
+     * @throws InterruptedException pokud dojde k přerušení
+     * @throws IOException          pokud dojde k I/O erroru
+     */
     @Override
     public void stop() throws InterruptedException, IOException {
         running = false;
@@ -54,6 +85,9 @@ public final class JIPServerImpl extends JIPServer {
         threadPool.shutdownNow();
     }
 
+    /**
+     * Přijme připojení klienta.
+     */
     private void accept() {
         try {
             var socket = serverSocket.accept();
@@ -76,11 +110,21 @@ public final class JIPServerImpl extends JIPServer {
         }
     }
 
+    /**
+     * Zjistí, zda-li je server spuštěn.
+     *
+     * @return true pokud je server spuštěn, jinak false
+     */
     @Override
     public boolean isRunning() {
         return running;
     }
 
+    /**
+     * Získá router serveru.
+     *
+     * @return router serveru
+     */
     @Override
     public Router getRouter() {
         return router;

@@ -16,17 +16,26 @@ import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 
 /**
- * A layer for encrypting and decrypting packets. Works as a middleware.
+ * Vrstva pro šifrování a dešifrování paketů. Funguje jako middleware.
  *
+ * @author Jan Štefanča
  * @see Packet
  * @see me.panjohnny.jip.transport.TransportLayer
  * @see TransportMiddleware
- * @author Jan Štefanča
+ * @since 1.0
  */
 public sealed class SecurityLayer implements TransportMiddleware permits ClientSecurityLayer, ServerSecurityLayer {
     private SecretKey aesKey;
     private final static System.Logger LOGGER = System.getLogger(SecurityLayer.class.getName());
 
+    /**
+     * Šifruje data pomocí RSA.
+     *
+     * @param data data k šifrování
+     * @param key  veřejný klíč pro šifrování
+     * @return zašifrovaná data
+     * @throws SecureTransportException pokud se nepodaří data zašifrovat
+     */
     protected byte[] encryptRSA(byte[] data, byte[] key) throws SecureTransportException {
         try {
             X509EncodedKeySpec spec = new X509EncodedKeySpec(key);
@@ -36,41 +45,62 @@ public sealed class SecurityLayer implements TransportMiddleware permits ClientS
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            throw new SecureTransportException("Failed to encrypt data with RSA: " + e.getMessage());
+            throw new SecureTransportException("Nepodařilo se zašifrovat data pomocí RSA: " + e.getMessage());
         }
     }
 
+    /**
+     * Generuje AES klíč.
+     *
+     * @return vygenerovaný AES klíč
+     * @throws SecureTransportException pokud se nepodaří vygenerovat AES klíč
+     */
     protected SecretKey generateAESKey() throws SecureTransportException {
         try {
             this.aesKey = AESUtil.generateAESKey();
         } catch (NoSuchAlgorithmException e) {
-            throw new SecureTransportException("Failed to generate AES key: " + e.getMessage());
+            throw new SecureTransportException("Nepodařilo se vygenerovat AES klíč: " + e.getMessage());
         }
         return this.aesKey;
     }
 
+    /**
+     * Nastaví AES klíč.
+     *
+     * @param key AES klíč jako pole bajtů
+     */
     protected void setAESKey(byte[] key) {
-        // Create SecretKey class from byte array
         this.aesKey = new SecretKeySpec(key, 0, key.length, "AES");
     }
 
+    /**
+     * Šifruje data pomocí AES.
+     *
+     * @param data data k šifrování
+     * @return zašifrovaná data
+     * @throws SecureTransportException pokud se nepodaří data zašifrovat
+     */
     public Bytes encrypt(Bytes data) throws SecureTransportException {
         try {
-            // Add Base64 encoding to the encrypted data
             return AESUtil.encryptAES(data, aesKey);
         } catch (Exception e) {
-            throw new SecureTransportException("Failed to encrypt data with AES: " + e.getMessage(), e);
+            throw new SecureTransportException("Nepodařilo se zašifrovat data pomocí AES: " + e.getMessage(), e);
         }
     }
-    
+
+    /**
+     * Dešifruje data pomocí AES.
+     *
+     * @param encryptedData zašifrovaná data
+     * @return dešifrovaná data
+     * @throws SecureTransportException pokud se nepodaří data dešifrovat
+     */
     public byte[] decrypt(byte[] encryptedData) throws SecureTransportException {
         try {
             ByteBuffer iv = ByteBuffer.allocate(AESUtil.IV_LENGTH);
             iv.put(encryptedData, 0, AESUtil.IV_LENGTH);
-            // Decode Base64 before decrypting
             var ivDec = iv.array();
 
-            // Decrypt the rest of the data
             ByteBuffer encrypted = ByteBuffer.allocate(encryptedData.length - AESUtil.IV_LENGTH);
             for (int i = AESUtil.IV_LENGTH; i < encryptedData.length; i++) {
                 encrypted.put(encryptedData[i]);
@@ -79,31 +109,49 @@ public sealed class SecurityLayer implements TransportMiddleware permits ClientS
 
             return AESUtil.decryptAES(encryptedDataDec, aesKey, ivDec);
         } catch (Exception e) {
-            throw new SecureTransportException("Failed to decrypt data with AES: " + e.getMessage(), e);
+            throw new SecureTransportException("Nepodařilo se dešifrovat data pomocí AES: " + e.getMessage(), e);
         }
     }
-    
 
+    /**
+     * Zpracuje zápis paketu a zašifruje jeho data.
+     *
+     * @param packet paket k zpracování
+     * @return zašifrovaný paket
+     */
     @Override
     public Packet processWrite(Packet packet) {
         try {
             return packet.encryptData(this);
         } catch (SecureTransportException e) {
-            LOGGER.log(System.Logger.Level.ERROR, "Failed to encrypt packet: " + e.getMessage(), e);
+            LOGGER.log(System.Logger.Level.ERROR, "Nepodařilo se zašifrovat paket: " + e.getMessage(), e);
             return packet;
-        }    
+        }
     }
 
+    /**
+     * Zpracuje čtení paketu a dešifruje jeho data.
+     *
+     * @param packet paket k zpracování
+     * @return dešifrovaný paket
+     */
     @Override
     public Packet processRead(Packet packet) {
         try {
             return packet.decryptData(this);
         } catch (SecureTransportException e) {
-            LOGGER.log(System.Logger.Level.ERROR, "Failed to decrypt packet: " + e.getMessage(), e);
+            LOGGER.log(System.Logger.Level.ERROR, "Nepodařilo se dešifrovat paket: " + e.getMessage(), e);
             return packet;
         }
     }
 
+    /**
+     * Zpracuje vstupně-výstupní operace paketu.
+     *
+     * @param packet paket k zpracování
+     * @return zpracovaný IOProcessor
+     * @throws Exception pokud se nepodaří zpracovat IO
+     */
     @Override
     public IOProcessor processIO(Packet packet) throws Exception {
         return AESUtil.encryptStream(packet.getData(), this.aesKey, packet.getStreamLen());
