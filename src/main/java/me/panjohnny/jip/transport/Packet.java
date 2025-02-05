@@ -6,7 +6,6 @@ import me.panjohnny.jip.util.ByteUtil;
 import me.panjohnny.jip.util.Bytes;
 
 import java.io.InputStream;
-import java.util.Arrays;
 
 /**
  * Reprezentuje paket, ten je jednotkou přenosu mezi klientem a serverem.
