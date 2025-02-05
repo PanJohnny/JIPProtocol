@@ -1,0 +1,9 @@
+me.panjohnny.jip.client
+me.panjohnny.jip.commons
+me.panjohnny.jip.security
+me.panjohnny.jip.server
+me.panjohnny.jip.server.router
+me.panjohnny.jip.transport
+me.panjohnny.jip.transport.packet
+me.panjohnny.jip.util
+test
