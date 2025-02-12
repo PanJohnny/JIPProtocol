@@ -16,9 +16,10 @@ import java.net.Socket;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Handles client requests.
+ * Zpracovává požadavky klienta.
  *
  * @author Jan Štefanča
+ * @since 1.0
  */
 public class ClientHandler {
     private final Socket socket;
@@ -29,6 +30,13 @@ public class ClientHandler {
 
     public static final long TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(10);
 
+    /**
+     * Vytvoří nového zpracovatele klienta.
+     *
+     * @param socket socket pro komunikaci s klientem
+     * @param router router pro směrování požadavků
+     * @throws IOException pokud se nepodaří inicializovat transportní vrstvu
+     */
     public ClientHandler(Socket socket, Router router) throws IOException {
         this.socket = socket;
         this.transportLayer = new TransportLayer(socket.getInputStream(), socket.getOutputStream());
@@ -36,11 +44,17 @@ public class ClientHandler {
         this.router = router;
     }
 
+    /**
+     * Zpracuje požadavky klienta.
+     */
     public void handle() {
         handshake();
         handleRequests();
     }
 
+    /**
+     * Provede handshake s klientem.
+     */
     private void handshake() {
         try {
             var clientHandshake = transportLayer.readN(294);
@@ -49,25 +63,29 @@ public class ClientHandler {
             transportLayer.writePacket(handshakePacket);
             transportLayer.useMiddleware(securityLayer);
         } catch (Exception e) {
-            LOGGER.log(System.Logger.Level.ERROR, "Failed to handshake with the client, closing...", e);
+            LOGGER.log(System.Logger.Level.ERROR, "Nepodařilo se provést handshake s klientem, uzavírám spojení...", e);
             try {
                 socket.close();
             } catch (IOException ex) {
-                LOGGER.log(System.Logger.Level.ERROR, "Failed to close the socket", ex);
+                LOGGER.log(System.Logger.Level.ERROR, "Nepodařilo se uzavřít socket", ex);
             }
         }
     }
 
     private boolean ready;
+
+    /**
+     * Zpracovává požadavky klienta.
+     */
     private void handleRequests() {
         long lastTime = System.nanoTime();
         ready = false;
-        // Server ready
+        // Server je připraven
         try {
-            transportLayer.writePacket(new Packet(1, new byte[] {1}));
+            transportLayer.writePacket(new Packet(1, new byte[]{1}));
             ready = true;
         } catch (Exception e) {
-            LOGGER.log(System.Logger.Level.ERROR, "Failed to notify ready state, closing...", e);
+            LOGGER.log(System.Logger.Level.ERROR, "Nepodařilo se oznámit připravenost serveru, uzavírám spojení...", e);
         }
 
         while (ready && !socket.isClosed() && System.currentTimeMillis() - lastTime < TIMEOUT_NANOS) {
@@ -79,15 +97,18 @@ public class ClientHandler {
             try {
                 socket.close();
             } catch (IOException e) {
-                LOGGER.log(System.Logger.Level.ERROR, "Failed to close socket", e);
+                LOGGER.log(System.Logger.Level.ERROR, "Nepodařilo se uzavřít socket", e);
             }
         }
     }
 
+    /**
+     * Zpracuje jeden požadavek klienta.
+     */
     private void handleRequest() {
         try {
             Packet packet = transportLayer.readPacket();
-            // Connection was closed by the client
+            // Spojení bylo uzavřeno klientem
             if (packet == null) {
                 ready = false;
                 return;
@@ -99,7 +120,7 @@ public class ClientHandler {
             if (route != null) {
                 var version = JIPVersion.getDefault().toString();
                 var status = StatusCode.OK.toString();
-                Response response =  new Response(version, status);
+                Response response = new Response(version, status);
                 var handler = router.getHandler(requestPacket.getResource());
                 if (route instanceof DynamicRoute dn) {
                     var params = dn.parseParameters(requestPacket.getResource());
@@ -111,17 +132,17 @@ public class ClientHandler {
             } else {
                 var version = JIPVersion.getDefault().toString();
                 var status = StatusCode.NOT_FOUND.toString();
-                Response response =  new Response(version, status);
+                Response response = new Response(version, status);
                 transportLayer.writePacket(response.fabricate());
             }
             //transportLayer.flush();
         } catch (Exception e) {
-            LOGGER.log(System.Logger.Level.ERROR, "Failed to read packet from the client, closing...", e);
+            LOGGER.log(System.Logger.Level.ERROR, "Nepodařilo se přečíst paket od klienta, uzavírám spojení...", e);
             try {
                 socket.close();
             } catch (IOException ex) {
-                LOGGER.log(System.Logger.Level.ERROR, "Failed to close the socket", ex);
+                LOGGER.log(System.Logger.Level.ERROR, "Nepodařilo se uzavřít socket", ex);
             }
-        }   
+        }
     }
 }

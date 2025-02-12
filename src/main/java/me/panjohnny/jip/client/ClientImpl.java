@@ -13,12 +13,15 @@ import java.net.Socket;
 import java.util.function.Consumer;
 
 /**
- * An implementation of JIP Client. By default, there is 10 second SO timeout. Before connecting to the server call to {@link Client#connect()} is required. After sending all request to the server use {@link Client#close()}
+ * Implementace klienta. Pro připojení využijte {@link Client#connect()}. Po získání všech odpovědí využijte {@link Client#close()}.
  *
- * @see Client
- * @see Socket#setSoTimeout(int) 
- * @see Client#useSocketConfigurator(Consumer)
+ * <p>Základní SO timeout je 60 sekund. (maximální doba blokování threadu pro read paketu)</p>
+ *
  * @author Jan Štefanča
+ * @see Client
+ * @see Socket#setSoTimeout(int)
+ * @see Client#useSocketConfigurator(Consumer)
+ * @since 1.0
  */
 public final class ClientImpl extends Client {
     private Socket socket;

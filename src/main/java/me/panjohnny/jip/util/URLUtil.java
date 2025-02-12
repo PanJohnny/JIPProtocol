@@ -1,24 +1,33 @@
 package me.panjohnny.jip.util;
 
+/**
+ * Utilitní třída pro manipulaci s URL.
+ * <p>
+ * Poskytuje metody pro izolaci části URL obsahující zdroj odstraněním dotazovacích parametrů, fragmentů a koncových lomítek.
+ * </p>
+ *
+ * @author Jan Štefanča
+ * @since 1.0
+ */
 public final class URLUtil {
     /**
-     * Removes query parameters and fragment from a URL. Trims trailing slashes.
+     * Odstraní dotazovací parametry a fragment z URL. Ořízne koncová lomítka.
      *
-     * @param path The URL to isolate the resource from.
-     * @return The resource path.
+     * @param path URL, ze které se má izolovat část obsahující zdroj.
+     * @return cesta ke zdroji.
      */
     public static String isolateResource(String path) {
-        // Remove trailing slashes
+        // Odstraní koncová lomítka
         if (path.endsWith("/")) {
             path = path.substring(0, path.length() - 1);
         }
 
-        // Remove query parameters
+        // Odstraní dotazovací parametry
         if (path.contains("?")) {
             path = path.substring(0, path.indexOf("?"));
         }
 
-        // Remove fragment
+        // Odstraní fragment
         if (path.contains("#")) {
             path = path.substring(0, path.indexOf("#"));
         }

@@ -3,8 +3,8 @@ Tato práce je součástí mé středoškolské odborná činnosti (SOČ) s náz
 
 Ve zkratce se jedná o jednoduchý (ve smyslu jednoduše fungující) aplikační protokol na bázi klient-server, který využívá TCP. Projekt je naprogramovaný v Javě a využívá Socket a streamů pro komunikaci.
 
-> [!NOTE]
-> Odkaz na dokumentaci bude zveřejněn později i se samotným odborným textem.
+* Dokumentace: https://panjohnny.github.io/JIPProtocol/apidocs
+* Středoškolská odborná činnost: https://panjohnny.github.io/JIPProtocol/N%C3%A1vrh%20a%20implementace%20internetov%C3%A9ho%20protokolu.pdf
 
 Děkuji za přečtení a přeji příjemný den. Chcete-li se podívat na mé další projekty, navštivte můj [GitHub profil](https://github.com/PanJohnny). Alternativně na mých webových stránkách naleznete pár demonstračních ukázek a bližší info o mně. https://panjohnny.me
 

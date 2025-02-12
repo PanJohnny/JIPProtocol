@@ -12,80 +12,101 @@ import java.net.Socket;
 import java.util.function.Consumer;
 
 /**
- * Client that connects to the server and sends requests
+ * Klient slouží k připojení klienta k serveru. Pro získání instance využijte {@link #create(InetSocketAddress)}.
+ *
  * @author Jan Štefanča
+ * @see #connect()
+ * @see #useSocketConfigurator(Consumer)
  * @see ClientImpl
+ * @since 1.0
  */
 public abstract sealed class Client permits ClientImpl {
     protected InetSocketAddress address;
 
     /**
-     * Creates a new client with the given address
-     * @param address address of the server
+     * Chráněný konstruktor klienta
+     *
+     * @param address adresa serveru
      */
-    public Client(InetSocketAddress address) {
+    protected Client(InetSocketAddress address) {
         this.address = address;
     }
 
     /**
-     * Connects to the server
-     * @throws IOException if an I/O error occurs
-     * @throws SecureTransportException if the secure transport layer fails
+     * Připojí klienta na předem definovanou adresu. Pro připojení na jinou adresu, či přepojení využijte {@link #connect(InetSocketAddress)}.
+     *
+     * @throws SecureTransportException pokud selže bezpečnostní vrstva
+     * @throws IOException              pokud dojde k I/O erroru
+     * @see #connect(InetSocketAddress)
+     * @see #close()
      */
     public abstract void connect() throws Exception;
 
     /**
-     * Connects to the server with the given address. If the client is already connected, it reconnects to the new address
-     * @param address address of the server
-     * @throws SecureTransportException if the secure transport layer fails
-     * @throws IOException if an I/O error occurs
+     * Připojí či přepojí klienta na definovanou adresu. Pro připojení na dříve použitou adresu využijte {@link #connect()}.
+     *
+     * @param address adresa serveru
+     * @throws SecureTransportException pokud selže bezpečnostní vrstva
+     * @throws IOException              pokud dojde k I/O erroru
      */
     public abstract void connect(InetSocketAddress address) throws Exception;
 
     /**
-     * Fetches response from the server
-     * @param req request to send to the server
-     * @return response from the server
-     * @throws SecureTransportException if the secure transport layer fails
-     * @throws IOException if an I/O error occurs
+     * Zašle žádost na server a pokusí se získat odpověď.
+     *
+     * @param req žádost
+     * @return odpověď ze serveru
+     * @throws SecureTransportException pokud selže bezpečnostní vrstva
+     * @throws IOException              pokud dojde k I/O erroru
+     * @see Request
+     * @see ResponsePacket
      */
     public abstract ResponsePacket fetch(Request req) throws Exception;
 
     /**
-     * Fetches response from the server
-     * @param resource path to the resource
-     * @return response from the server
-     * @throws SecureTransportException if the secure transport layer fails
-     * @throws IOException if an I/O error occurs
+     * Zašle žádost na server s aktuální verzí knihovny a definovanou cestou a pokusí se získat odpověď.
+     *
+     * @param resource cesta
+     * @return odpověď ze serveru
+     * @throws SecureTransportException pokud selže bezpečnostní vrstva
+     * @throws IOException              pokud dojde k I/O erroru
+     * @see Request
+     * @see ResponsePacket
      */
     public ResponsePacket fetch(String resource) throws Exception {
         return fetch(new Request(JIPVersion.getDefault().toString(), resource));
     }
+
     /**
-     * Closes the connection to the server
-     * @throws IOException if an I/O error occurs
+     * Ukončí spojení se serverem uzavřením soketu. (Klient je tedy odpojen.)
+     *
+     * @throws IOException pokud dojde k I/O erroru
      */
     public abstract void close() throws IOException;
 
     /**
-     * Checks if the client socket is closed
-     * @return true if the client socket is closed, false otherwise
+     * Zjistí, zda-li je soket uzavřen.
+     *
+     * @return true pokud je soket uzavřen, jinak false
+     * @see #close()
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public abstract boolean isClosed();
 
     /**
-     * Gets the address of the server
-     * @return address of the server
+     * Získá poslední využitou adresu serveru. Pokud nebylo využito metody {@link #connect(InetSocketAddress)}, je touto adresou adresa, která byla využita na tvorbu instance.
+     *
+     * @return poslední využitá adresa serveru
      */
     public InetSocketAddress getAddress() {
         return address;
     }
 
     /**
-     * Creates a new client with the given address
-     * @param address address of the server
-     * @return new client
+     * Vytvoří nového klienta.
+     *
+     * @param address adresa serveru
+     * @return nová instance klienta
      */
     public static Client create(InetSocketAddress address) {
         return new ClientImpl(address);
@@ -93,9 +114,16 @@ public abstract sealed class Client permits ClientImpl {
 
 
     /**
-     * Set a consumer to further configure the socket when connecting to the server
-     * @param socketConsumer a consumer to configure the connection
-     * @return instance of client, same as the object, created in order to be used after consumer
+     * Nastaví consumer pro další konfiguraci soketu při připojování k serveru.
+     *
+     * <p>Ukázka využití:</p>
+     * <pre>{@code
+     * var client = Client.create(addr).useSocketConfigurator((s) -> {
+     * s.setSoTimeout(20000); // maximální doba blokování read
+     * })}</pre>
+     *
+     * @param socketConsumer consumer pro konfiguraci připojení
+     * @return aktuální instance klienta
      */
     public abstract Client useSocketConfigurator(Consumer<Socket> socketConsumer);
 }
