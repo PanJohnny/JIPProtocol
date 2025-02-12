@@ -34,7 +34,7 @@ public final class ClientImpl extends Client {
 
     @Override
     public void connect() throws Exception {
-        if (!isClosed()) {
+        if (!isClosed() && socket != null) {
             throw new IllegalStateException("Klient je připojen k serveru. Použijte #connect(InetSocketAddress) k přepojení na jinou adresu, nebo #close k uzavření spojení.");
         }
         socket = new Socket();

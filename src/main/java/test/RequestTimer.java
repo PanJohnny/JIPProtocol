@@ -14,8 +14,7 @@ public class RequestTimer {
             return null;
         }
         long elapsed = System.nanoTime() - current;
-        //LOGGER.log(System.Logger.Level.INFO, "[MĚŘENÍ ÚSPĚŠNÉ] {0} $$ {1} ms", title, elapsed/1_000_000);
-        System.out.println(elapsed / 1_000_000);
+        LOGGER.log(System.Logger.Level.INFO, "[MĚŘENÍ ÚSPĚŠNÉ] {0} $$ {1} ms", title, elapsed/1_000_000);
         return r;
     }
 
